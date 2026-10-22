@@ -30,7 +30,8 @@ import {
   Sun,
   Moon,
   BookOpen,
-  Repeat
+  Repeat,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function App() {
@@ -72,6 +73,14 @@ export default function App() {
   const todayScheduledPlanIds = getScheduledPlansForDate(todayStr, activeProgram, overrides);
   const todayPlanId = todayScheduledPlanIds.length > 0 ? todayScheduledPlanIds[0] : undefined;
   const todayPlan = todayPlanId ? planMap.get(todayPlanId) : undefined;
+
+  // Check if any workout was completed today
+  const todaysCompletedWorkouts = useLiveQuery(
+    () => db.workouts.where('localDate').equals(todayStr).filter((w) => w.status === 'completed').toArray(),
+    [todayStr],
+    []
+  );
+  const completedTodayWorkout = todaysCompletedWorkouts.length > 0 ? todaysCompletedWorkouts[0] : undefined;
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -181,79 +190,171 @@ export default function App() {
           ) : (
             /* Clean, Actionable Workout Dashboard */
             <div className="space-y-6 animate-in fade-in duration-200">
-              {/* Today's Scheduled Plan Card */}
-              <div className="flat-card p-6">
+              {/* Today's Scheduled Plan or Completed Session Card */}
+              <div
+                className={`flat-card p-6 transition-colors ${
+                  completedTodayWorkout
+                    ? 'border-emerald-500/50 bg-emerald-950/10 shadow-lg'
+                    : ''
+                }`}
+              >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-[#d9083c] rounded-full animate-pulse" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Today's Scheduled Routine
-                    </span>
+                    {completedTodayWorkout ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
+                        <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                          Completed Today
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2 h-2 bg-[#d9083c] rounded-full animate-pulse" />
+                        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                          Today's Scheduled Routine
+                        </span>
+                      </>
+                    )}
                   </div>
                   <span className="text-xs font-mono text-[var(--text-muted)]">
                     {activeProgram ? activeProgram.name : 'Weekly Program'}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)]">
-                      {todayPlan ? todayPlan.name : activeProgram ? 'Rest Day' : 'Strength Session'}
-                    </h2>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
-                      {todayPlan
-                        ? `${todayPlan.exercises.length} exercises scheduled for today's session`
-                        : activeProgram
-                        ? 'No workouts scheduled for today in your active program.'
-                        : 'Start an empty workout or create a plan to begin logging.'}
-                    </p>
-                  </div>
+                {completedTodayWorkout ? (
+                  /* Completed Today View */
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <h2 className="text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
+                          <span>{completedTodayWorkout.name}</span>
+                        </h2>
+                        <p className="text-xs text-emerald-400/90 mt-1">
+                          Session finished · Great work completing your training today!
+                        </p>
+                      </div>
 
-                  <div className="flex items-center space-x-2">
-                    {todayPlan && (
-                      <button
-                        onClick={handleStartTodayPlan}
-                        className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5 shadow-lg"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                        <span>Start Workout</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={handleStartEmpty}
-                      className={`${todayPlan ? 'btn-secondary' : 'btn-primary'} flex items-center space-x-1.5 text-xs py-2.5 px-4`}
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>{todayPlan ? 'Empty Session' : 'Start Workout'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Movements list preview in today's plan */}
-                {todayPlan?.exercises && todayPlan.exercises.length > 0 && (
-                  <div className="pt-4 border-t border-[var(--border-color)]">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2.5">
-                      Scheduled Movements ({todayPlan.exercises.length})
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setActiveTab('history')}
+                          className="btn-primary flex items-center space-x-1.5 text-xs py-2 px-4 bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-md"
+                        >
+                          <Flame className="w-3.5 h-3.5" />
+                          <span>View in History</span>
+                        </button>
+                        <button
+                          onClick={handleStartEmpty}
+                          className="btn-secondary flex items-center space-x-1.5 text-xs py-2 px-3 text-[var(--text-muted)] hover:text-white"
+                          title="Start another workout session today"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Train Again</span>
+                        </button>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {todayPlan.exercises.map((pe, idx) => {
-                        const ex = exerciseMap.get(pe.exerciseId);
-                        return (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-between p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] text-xs"
-                          >
-                            <span className="font-medium text-[var(--text-color)] truncate pr-2">
-                              {ex?.name || 'Movement'}
-                            </span>
-                            <span className="font-mono text-[11px] text-[var(--text-muted)] whitespace-nowrap">
-                              {pe.targetSets || 3} sets
-                            </span>
+
+                    {/* Today's Completed Session Stats */}
+                    {completedTodayWorkout.summary && (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3 border-t border-[#2a2a2a]">
+                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
+                            Duration
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="text-sm font-bold font-mono text-white mt-0.5">
+                            {Math.floor(completedTodayWorkout.summary.durationSec / 60)} mins
+                          </div>
+                        </div>
+                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
+                            Volume
+                          </div>
+                          <div className="text-sm font-bold font-mono text-white mt-0.5">
+                            {completedTodayWorkout.summary.totalVolumeKg.toLocaleString()} kg
+                          </div>
+                        </div>
+                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
+                            Working Sets
+                          </div>
+                          <div className="text-sm font-bold font-mono text-white mt-0.5">
+                            {completedTodayWorkout.summary.workingSets} sets
+                          </div>
+                        </div>
+                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
+                            Total Reps
+                          </div>
+                          <div className="text-sm font-bold font-mono text-white mt-0.5">
+                            {completedTodayWorkout.summary.totalReps} reps
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  /* Not Yet Completed Today View */
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                      <div>
+                        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)]">
+                          {todayPlan ? todayPlan.name : activeProgram ? 'Rest Day' : 'Strength Session'}
+                        </h2>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">
+                          {todayPlan
+                            ? `${todayPlan.exercises.length} exercises scheduled for today's session`
+                            : activeProgram
+                            ? 'No workouts scheduled for today in your active program.'
+                            : 'Start an empty workout or create a plan to begin logging.'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {todayPlan && (
+                          <button
+                            onClick={handleStartTodayPlan}
+                            className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5 shadow-lg"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-white" />
+                            <span>Start Workout</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={handleStartEmpty}
+                          className={`${todayPlan ? 'btn-secondary' : 'btn-primary'} flex items-center space-x-1.5 text-xs py-2.5 px-4`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{todayPlan ? 'Empty Session' : 'Start Workout'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Movements list preview in today's plan */}
+                    {todayPlan?.exercises && todayPlan.exercises.length > 0 && (
+                      <div className="pt-4 border-t border-[var(--border-color)]">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2.5">
+                          Scheduled Movements ({todayPlan.exercises.length})
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {todayPlan.exercises.map((pe, idx) => {
+                            const ex = exerciseMap.get(pe.exerciseId);
+                            return (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] text-xs"
+                              >
+                                <span className="font-medium text-[var(--text-color)] truncate pr-2">
+                                  {ex?.name || 'Movement'}
+                                </span>
+                                <span className="font-mono text-[11px] text-[var(--text-muted)] whitespace-nowrap">
+                                  {pe.targetSets || 3} sets
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
