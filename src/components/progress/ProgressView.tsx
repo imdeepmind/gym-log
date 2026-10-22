@@ -12,6 +12,7 @@ import {
 import { exportSetsToCSV, downloadCSVFile, importFromCSV } from '@/services/csv';
 import { PRsGallery } from './PRsGallery';
 import { BodyTrackingView } from './BodyTrackingView';
+import { MuscleHeatmap } from '../heatmap/MuscleHeatmap';
 import {
   ResponsiveContainer,
   LineChart,
@@ -35,12 +36,13 @@ import {
   Sparkles,
   Calendar,
   CheckCircle2,
+  Flame,
 } from 'lucide-react';
 
 const TIME_RANGES: TimeRange[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
 export function ProgressView() {
-  const [activeSubtab, setActiveSubtab] = useState<'exercise' | 'overall' | 'prs' | 'body' | 'csv'>('exercise');
+  const [activeSubtab, setActiveSubtab] = useState<'exercise' | 'overall' | 'heatmap' | 'prs' | 'body' | 'csv'>('exercise');
   const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
 
   // Exercise selection for per-exercise analytics
@@ -131,6 +133,7 @@ export function ProgressView() {
         {[
           { id: 'exercise', label: 'Movement Progression', icon: TrendingUp },
           { id: 'overall', label: 'Overall Volume Trend', icon: Activity },
+          { id: 'heatmap', label: 'Muscle Heatmap', icon: Flame },
           { id: 'prs', label: 'Personal Records', icon: Trophy },
           { id: 'body', label: 'Body Measurements', icon: Activity },
           { id: 'csv', label: 'CSV Export / Import', icon: FileSpreadsheet },
@@ -346,7 +349,10 @@ export function ProgressView() {
         </div>
       )}
 
-      {/* SUBTAB 3: PERSONAL RECORDS */}
+      {/* SUBTAB 3: MUSCLE HEATMAP */}
+      {activeSubtab === 'heatmap' && <MuscleHeatmap />}
+
+      {/* SUBTAB 4: PERSONAL RECORDS */}
       {activeSubtab === 'prs' && <PRsGallery />}
 
       {/* SUBTAB 4: BODY MEASUREMENTS */}
