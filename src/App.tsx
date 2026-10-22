@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/db/schema';
 import { 
   Dumbbell, 
   Flame, 
@@ -14,12 +16,21 @@ import {
   Layers,
   ArrowRight,
   Sun,
-  Moon
+  Moon,
+  Database
 } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'workout' | 'calendar' | 'progress' | 'history' | 'settings'>('workout');
   const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Initialize DB seed exercises and settings on mount
+  useEffect(() => {
+    db.initializeSeedAndSettings().catch(console.error);
+  }, []);
+
+  // Reactive Dexie query
+  const exerciseCount = useLiveQuery(() => db.exercises.count(), [], 0);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -230,9 +241,9 @@ export default function App() {
               </div>
               <div className="space-y-1">
                 {[
-                  { label: 'Exercise Library (200 Exercises)', count: '200' },
-                  { label: 'Workout Plans & Templates', count: '4' },
-                  { label: 'Calendar Adherence Matrix', count: 'Oct 2026' },
+                  { label: 'Exercise Library', count: `${exerciseCount || 200} Exercises` },
+                  { label: 'Workout Plans & Templates', count: '4 Plans' },
+                  { label: 'Calendar Adherence Matrix', count: 'Monthly' },
                   { label: 'Data Backup (Export / Import)', count: 'JSON' },
                 ].map((link, idx) => (
                   <button
