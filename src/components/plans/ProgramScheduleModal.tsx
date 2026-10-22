@@ -248,7 +248,7 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
                 className="btn-primary text-xs py-2 px-5 flex items-center space-x-1.5"
               >
                 {isSaved ? <Check className="w-4 h-4 stroke-[3]" /> : null}
-                <span>{isSaved ? 'Saved!' : 'Save Schedule'}</span>
+                <span>{isSaved ? 'Saved!' : 'Save'}</span>
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { Plan, PlanExercise, Exercise } from '@/types';
@@ -18,7 +18,20 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
   const [exercises, setExercises] = useState<PlanExercise[]>(planToEdit?.exercises || []);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
+  useEffect(() => {
+    if (planToEdit) {
+      setName(planToEdit.name);
+      setNotes(planToEdit.notes || '');
+      setExercises(planToEdit.exercises || []);
+    } else {
+      setName('');
+      setNotes('');
+      setExercises([]);
+    }
+  }, [planToEdit, isOpen]);
+
   const allExercises = useLiveQuery(() => db.exercises.toArray(), [], []);
+
   const exerciseMap = new Map<string, Exercise>();
   allExercises.forEach((e) => exerciseMap.set(e.id, e));
 
@@ -277,7 +290,7 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
               Cancel
             </button>
             <button type="submit" className="btn-primary text-xs">
-              {planToEdit ? 'Save Changes' : 'Create Plan'}
+              Save
             </button>
           </div>
         </form>
