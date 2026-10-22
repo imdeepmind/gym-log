@@ -4,14 +4,18 @@ import { BodyMetric } from '@/types';
 export const BODY_METRIC_TYPES = [
   { id: 'bodyweight', label: 'Bodyweight', unit: 'kg' },
   { id: 'body_fat', label: 'Body Fat', unit: '%' },
-  { id: 'chest', label: 'Chest', unit: 'cm' },
   { id: 'waist', label: 'Waist', unit: 'cm' },
-  { id: 'hips', label: 'Hips', unit: 'cm' },
-  { id: 'arm', label: 'Arms', unit: 'cm' },
+  { id: 'chest', label: 'Chest', unit: 'cm' },
+  { id: 'arm', label: 'Biceps', unit: 'cm' },
+  { id: 'forearms', label: 'Forearms', unit: 'cm' },
+  { id: 'shoulders', label: 'Shoulders', unit: 'cm' },
   { id: 'thigh', label: 'Thighs', unit: 'cm' },
+  { id: 'calves', label: 'Calves', unit: 'cm' },
+  { id: 'hips', label: 'Hips', unit: 'cm' },
+  { id: 'neck', label: 'Neck', unit: 'cm' },
 ] as const;
 
-export type MetricType = typeof BODY_METRIC_TYPES[number]['id'];
+export type MetricType = typeof BODY_METRIC_TYPES[number]['id'] | 'biceps';
 
 export async function addBodyMetric(
   type: MetricType,

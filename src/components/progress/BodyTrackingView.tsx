@@ -11,12 +11,47 @@ export function BodyTrackingView() {
   const [inputDate, setInputDate] = useState(new Date().toISOString().slice(0, 10));
 
   const metrics = useLiveQuery(
-    () => db.bodyMetrics.where('type').equals(selectedType).sortBy('date'),
+    async () => {
+      if (selectedType === 'arm') {
+        return db.bodyMetrics.where('type').anyOf(['arm', 'biceps']).sortBy('date');
+      }
+      return db.bodyMetrics.where('type').equals(selectedType).sortBy('date');
+    },
     [selectedType],
     []
   );
 
   const activeMetricConfig = BODY_METRIC_TYPES.find((m) => m.id === selectedType) || BODY_METRIC_TYPES[0];
+
+  const getPlaceholder = (type: MetricType) => {
+    switch (type) {
+      case 'bodyweight':
+        return '78.5';
+      case 'body_fat':
+        return '14.5';
+      case 'arm':
+      case 'biceps':
+        return '38.0';
+      case 'forearms':
+        return '31.0';
+      case 'chest':
+        return '104.0';
+      case 'waist':
+        return '82.0';
+      case 'hips':
+        return '98.0';
+      case 'thigh':
+        return '60.0';
+      case 'calves':
+        return '38.5';
+      case 'shoulders':
+        return '122.0';
+      case 'neck':
+        return '39.0';
+      default:
+        return '30.0';
+    }
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,30 +62,30 @@ export function BodyTrackingView() {
     setInputValue('');
   };
 
-  const chartData = metrics.map((m) => ({
+  const chartData = (metrics || []).map((m) => ({
     date: m.date.slice(5), // MM-DD
     value: m.value,
   }));
 
-  const latestValue = metrics.length > 0 ? metrics[metrics.length - 1].value : undefined;
-  const initialValue = metrics.length > 0 ? metrics[0].value : undefined;
+  const latestValue = (metrics || []).length > 0 ? metrics![metrics!.length - 1].value : undefined;
+  const initialValue = (metrics || []).length > 0 ? metrics![0].value : undefined;
   const diff = latestValue !== undefined && initialValue !== undefined ? Math.round((latestValue - initialValue) * 10) / 10 : 0;
 
   return (
     <div className="space-y-5">
       {/* Metric Type Selector */}
-      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+      <div className="flex flex-wrap gap-1.5 text-xs">
         {BODY_METRIC_TYPES.map((m) => (
           <button
             key={m.id}
             onClick={() => setSelectedType(m.id)}
-            className={`px-3 py-1.5 rounded-sm text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-colors ${
+            className={`px-3 py-1.5 rounded-sm text-xs font-semibold uppercase tracking-wider transition-colors ${
               selectedType === m.id
-                ? 'bg-[#d9083c] text-white'
-                : 'bg-[#1e1e1e] text-[var(--text-muted)] hover:text-white'
+                ? 'bg-[#d9083c] text-white shadow-sm'
+                : 'bg-[#181818] border border-[#2a2a2a] text-[var(--text-muted)] hover:text-white hover:border-[#3a3a3a]'
             }`}
           >
-            {m.label} ({m.unit})
+            {m.label} <span className="opacity-60 text-[10px]">({m.unit})</span>
           </button>
         ))}
       </div>
@@ -71,7 +106,7 @@ export function BodyTrackingView() {
                 type="number"
                 step="0.1"
                 required
-                placeholder={`e.g. ${selectedType === 'bodyweight' ? '78.5' : '15'}`}
+                placeholder={`e.g. ${getPlaceholder(selectedType)}`}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 className="flat-input w-full p-2 text-xs font-mono"
@@ -113,7 +148,7 @@ export function BodyTrackingView() {
                 {activeMetricConfig.unit}
               </span>
             </div>
-            {metrics.length > 1 && (
+            {(metrics?.length ?? 0) > 1 && (
               <div className="text-[11px] font-mono mt-1 text-[var(--text-muted)]">
                 Change: <strong className={diff > 0 ? 'text-emerald-400' : 'text-rose-400'}>
                   {diff > 0 ? `+${diff}` : diff} {activeMetricConfig.unit}
@@ -122,7 +157,7 @@ export function BodyTrackingView() {
             )}
           </div>
           <div className="text-[10px] text-[var(--text-muted)] font-mono">
-            {metrics.length} logged entries
+            {metrics?.length ?? 0} logged entries
           </div>
         </div>
       </div>
@@ -164,13 +199,13 @@ export function BodyTrackingView() {
       )}
 
       {/* History Log Table */}
-      {metrics.length > 0 && (
+      {(metrics?.length ?? 0) > 0 && (
         <div className="flat-card overflow-hidden">
           <div className="px-4 py-2.5 border-b border-[#2a2a2a] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-            Recorded History ({metrics.length})
+            Recorded History ({metrics!.length})
           </div>
           <div className="divide-y divide-[#2a2a2a] max-h-60 overflow-y-auto">
-            {metrics
+            {metrics!
               .slice()
               .reverse()
               .map((m) => (

@@ -186,7 +186,19 @@ export interface SetEntry extends Base {
 }
 
 export interface BodyMetric extends Base {
-  type: 'bodyweight' | 'body_fat' | 'chest' | 'waist' | 'hips' | 'arm' | 'thigh';
+  type:
+    | 'bodyweight'
+    | 'body_fat'
+    | 'chest'
+    | 'waist'
+    | 'hips'
+    | 'arm'
+    | 'biceps'
+    | 'forearms'
+    | 'thigh'
+    | 'calves'
+    | 'shoulders'
+    | 'neck';
   date: string; // YYYY-MM-DD
   value: number;
 }

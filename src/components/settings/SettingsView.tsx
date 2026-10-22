@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { exportJSONBackup, downloadBackupFile, validateBackupFile, executeImport, ImportPreview } from '@/services/backup';
-import { Download, Upload, Shield, Database, HardDrive, Check, AlertTriangle, Moon, Sun } from 'lucide-react';
+import { exportSetsToCSV, downloadCSVFile, importFromCSV } from '@/services/csv';
+import { Download, Upload, Shield, Database, HardDrive, Check, AlertTriangle, Moon, Sun, FileSpreadsheet } from 'lucide-react';
 
 export function SettingsView() {
   const settingsRecords = useLiveQuery(() => db.settings.toArray(), [], []);
@@ -18,6 +19,7 @@ export function SettingsView() {
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [importStrategy, setImportStrategy] = useState<'merge' | 'replace'>('merge');
   const [importSuccess, setImportSuccess] = useState(false);
+  const [csvStatus, setCsvStatus] = useState<string | null>(null);
 
   // Check persistent storage status
   useEffect(() => {
@@ -42,6 +44,29 @@ export function SettingsView() {
   const handleExportBackup = async () => {
     const backup = await exportJSONBackup();
     downloadBackupFile(backup);
+  };
+
+  const handleExportCSV = async () => {
+    const csv = await exportSetsToCSV();
+    downloadCSVFile(csv);
+  };
+
+  const handleCSVImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target?.result as string;
+        const res = await importFromCSV(text);
+        setCsvStatus(`Successfully imported ${res.importedWorkouts} workouts and ${res.importedSets} sets!`);
+        setTimeout(() => setCsvStatus(null), 5000);
+      } catch (err: any) {
+        setCsvStatus(`Import error: ${err.message}`);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,9 +217,28 @@ export function SettingsView() {
             <span>Export Full JSON Backup</span>
           </button>
 
-          <label className="btn-secondary text-xs flex items-center space-x-1.5 py-2.5 px-4 cursor-pointer">
+          <button
+            onClick={handleExportCSV}
+            className="btn-secondary text-xs flex items-center space-x-1.5 py-2.5 px-4 hover:border-[#d9083c] transition-colors"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-[#d9083c]" />
+            <span>Export CSV Spreadsheet</span>
+          </button>
+
+          <label className="btn-secondary text-xs flex items-center space-x-1.5 py-2.5 px-4 cursor-pointer hover:border-[#d9083c] transition-colors">
             <Upload className="w-3.5 h-3.5 text-[#d9083c]" />
-            <span>Import Backup File</span>
+            <span>Import Strong / Hevy CSV</span>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleCSVImport}
+              className="hidden"
+            />
+          </label>
+
+          <label className="btn-secondary text-xs flex items-center space-x-1.5 py-2.5 px-4 cursor-pointer">
+            <Upload className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <span>Restore JSON Backup</span>
             <input
               type="file"
               accept=".json"
@@ -203,6 +247,12 @@ export function SettingsView() {
             />
           </label>
         </div>
+
+        {csvStatus && (
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs rounded-sm">
+            {csvStatus}
+          </div>
+        )}
 
         {/* Import Preview Modal / Box */}
         {importPreview && (
