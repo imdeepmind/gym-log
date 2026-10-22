@@ -121,9 +121,8 @@ export function SettingsView() {
               <button
                 key={u}
                 onClick={() => handleUpdateSetting('unit', u)}
-                className={`px-3 py-1 text-xs font-bold uppercase rounded-sm transition-colors ${
-                  unit === u ? 'bg-[#d9083c] text-white' : 'text-[var(--text-muted)] hover:text-white'
-                }`}
+                className={`px-3 py-1 text-xs font-bold uppercase rounded-sm transition-colors ${unit === u ? 'bg-[#d9083c] text-white' : 'text-[var(--text-muted)] hover:text-white'
+                  }`}
               >
                 {u}
               </button>
@@ -319,17 +318,6 @@ export function SettingsView() {
             Backup successfully restored into IndexedDB!
           </div>
         )}
-      </div>
-
-      {/* Storage Estimate */}
-      <div className="flat-card p-5 space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-          IndexedDB Offline Storage
-        </h3>
-        <div className="text-xs text-white font-mono flex items-center space-x-2">
-          <HardDrive className="w-4 h-4 text-[#d9083c]" />
-          <span>{storageStatus}</span>
-        </div>
       </div>
     </div>
   );
