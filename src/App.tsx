@@ -70,8 +70,8 @@ export default function App() {
   // Resolve today's scheduled plan
   const todayStr = new Date().toISOString().slice(0, 10);
   const todayScheduledPlanIds = getScheduledPlansForDate(todayStr, activeProgram, overrides);
-  const todayPlanId = todayScheduledPlanIds.length > 0 ? todayScheduledPlanIds[0] : 'plan_push_a';
-  const todayPlan = planMap.get(todayPlanId) || planMap.get('plan_push_a');
+  const todayPlanId = todayScheduledPlanIds.length > 0 ? todayScheduledPlanIds[0] : undefined;
+  const todayPlan = todayPlanId ? planMap.get(todayPlanId) : undefined;
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -91,7 +91,7 @@ export default function App() {
     if (todayPlan) {
       await startWorkoutFromPlan(todayPlan.id);
     } else {
-      await startWorkout('Push Day A · Chest & Shoulders');
+      await startWorkout('Strength Session');
     }
     setActiveTab('workout');
   };
@@ -198,27 +198,33 @@ export default function App() {
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                   <div>
                     <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)]">
-                      {todayPlan?.name || 'Strength Session'}
+                      {todayPlan ? todayPlan.name : activeProgram ? 'Rest Day' : 'Strength Session'}
                     </h2>
                     <p className="text-xs text-[var(--text-muted)] mt-1">
-                      {todayPlan?.exercises.length || 0} exercises scheduled for today's session
+                      {todayPlan
+                        ? `${todayPlan.exercises.length} exercises scheduled for today's session`
+                        : activeProgram
+                        ? 'No workouts scheduled for today in your active program.'
+                        : 'Start an empty workout or create a plan to begin logging.'}
                     </p>
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <button
-                      onClick={handleStartTodayPlan}
-                      className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5 shadow-lg"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>Start Workout</span>
-                    </button>
+                    {todayPlan && (
+                      <button
+                        onClick={handleStartTodayPlan}
+                        className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5 shadow-lg"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white" />
+                        <span>Start Workout</span>
+                      </button>
+                    )}
                     <button
                       onClick={handleStartEmpty}
-                      className="btn-secondary flex items-center space-x-1.5 text-xs py-2.5 px-4"
+                      className={`${todayPlan ? 'btn-secondary' : 'btn-primary'} flex items-center space-x-1.5 text-xs py-2.5 px-4`}
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Empty Session</span>
+                      <span>{todayPlan ? 'Empty Session' : 'Start Workout'}</span>
                     </button>
                   </div>
                 </div>
@@ -271,8 +277,25 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {plans.map((p) => (
+                {plans.length === 0 ? (
+                  <div className="flat-card p-6 text-center space-y-2">
+                    <div className="font-semibold text-xs text-[var(--text-color)]">
+                      No Plans Created Yet
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+                      Build your first plan to start tracking custom routines with target sets and prefilled weights.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('plans')}
+                      className="btn-primary text-xs py-1.5 px-3 inline-flex items-center space-x-1.5 mt-2"
+                    >
+                      <Plus className="w-3 h-3 stroke-[2.5]" />
+                      <span>Create Plan</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {plans.map((p) => (
                     <div
                       key={p.id}
                       className="flat-card p-4 flex flex-col justify-between space-y-3 hover:border-[#d9083c]/60 transition-colors group"
@@ -304,7 +327,8 @@ export default function App() {
                       </button>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Recent Activity */}

@@ -84,8 +84,29 @@ export function PlansView({ onStartPlanWorkout }: Props) {
         </div>
       </div>
 
-      {/* Grid of Plans */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Grid of Plans or Empty State */}
+      {plans.length === 0 ? (
+        <div className="flat-card p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-sm bg-[#1e1e1e] border border-[#2a2a2a] flex items-center justify-center mx-auto text-[#d9083c]">
+            <Layers className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-white">No Plans Created Yet</h3>
+          <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+            You don't have any custom plans saved. Tap "New Plan" above to configure your exercises, sets, and rep targets.
+          </p>
+          <button
+            onClick={() => {
+              setEditingPlan(null);
+              setIsEditorOpen(true);
+            }}
+            className="btn-primary text-xs py-2 px-4 inline-flex items-center space-x-1.5"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Create First Plan</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {plans.map((plan) => (
           <div key={plan.id} className="flat-card p-5 flex flex-col justify-between space-y-4">
             <div>
@@ -174,7 +195,8 @@ export function PlansView({ onStartPlanWorkout }: Props) {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       <PlanEditorModal
         isOpen={isEditorOpen}

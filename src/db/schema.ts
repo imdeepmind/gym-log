@@ -11,8 +11,6 @@ import {
   AppSettings,
 } from '@/types';
 import { SEEDED_EXERCISES } from './seed/exercises';
-import { SEEDED_PLANS } from '@/services/plan';
-import { SEEDED_PROGRAM } from '@/services/program';
 
 export interface SettingRecord {
   key: string;
@@ -62,24 +60,19 @@ export class GymLogDB extends Dexie {
   }
 
   async initializeSeedAndSettings() {
-    // Check if exercises are already seeded
+    // Check if exercises are already seeded (200 library exercises per spec)
     const exerciseCount = await this.exercises.count();
     if (exerciseCount === 0) {
       console.log('Seeding initial 200 exercises...');
       await this.exercises.bulkPut(SEEDED_EXERCISES);
     }
 
-    // Seed default plans if empty
-    const planCount = await this.plans.count();
-    if (planCount === 0) {
-      await this.plans.bulkAdd(SEEDED_PLANS);
+    // Clean up sample demo plans and programs if present
+    const demoPlanIds = ['plan_push_a', 'plan_pull_a', 'plan_leg_a', 'plan_upper_power'];
+    for (const pid of demoPlanIds) {
+      await this.plans.delete(pid);
     }
-
-    // Seed default program if empty
-    const programCount = await this.programs.count();
-    if (programCount === 0) {
-      await this.programs.add(SEEDED_PROGRAM);
-    }
+    await this.programs.delete('prog_ppl_weekly');
 
     // Check settings
     for (const [k, v] of Object.entries(DEFAULT_SETTINGS)) {
