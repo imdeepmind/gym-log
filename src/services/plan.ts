@@ -66,7 +66,7 @@ export const SEEDED_PLANS: Plan[] = [
 ];
 
 /**
- * Initializes default templates if none exist.
+ * Initializes default plans if none exist.
  */
 export async function initializeDefaultPlans() {
   const count = await db.plans.count();
@@ -76,7 +76,7 @@ export async function initializeDefaultPlans() {
 }
 
 /**
- * Starts an active workout from a Plan template (Spec 7.3).
+ * Starts an active workout from a Plan (Spec 7.3).
  * Priority order for prefilling set rows:
  * 1. Plan's target weight and reps
  * 2. Last performance of that exercise (auto-fill)
@@ -153,7 +153,7 @@ export async function startWorkoutFromPlan(
 }
 
 /**
- * Saves a finished workout as a reusable Plan template.
+ * Saves a finished workout as a reusable Plan.
  */
 export async function saveWorkoutAsPlan(
   workoutId: ID,

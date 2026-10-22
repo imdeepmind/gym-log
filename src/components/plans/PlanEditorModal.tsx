@@ -98,7 +98,7 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
               {planToEdit ? 'Edit Workout Plan' : 'Create Workout Plan'}
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
-              Build a reusable template with target sets, reps, and rest intervals
+              Configure movements with target sets, rep ranges, and rest intervals
             </p>
           </div>
           <button

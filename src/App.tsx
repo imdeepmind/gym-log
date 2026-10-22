@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
+import { Exercise } from '@/types';
 import { startWorkout, getActiveWorkout } from '@/services/workout';
 import { startWorkoutFromPlan } from '@/services/plan';
 import { getActiveProgram } from '@/services/program';
@@ -24,16 +25,11 @@ import {
   Settings as SettingsIcon, 
   Plus, 
   Play, 
-  CheckCircle2, 
-  BarChart2, 
-  Clock, 
-  Folder,
   Layers,
   ArrowRight,
   Sun,
   Moon,
   BookOpen,
-  Sparkles,
   Repeat
 } from 'lucide-react';
 
@@ -53,16 +49,22 @@ export default function App() {
   const activeProgram = useLiveQuery(() => getActiveProgram(), [], undefined);
   const overrides = useLiveQuery(() => db.scheduleOverrides.toArray(), [], []);
 
-  // Total exercise count & plans
-  const exerciseCount = useLiveQuery(() => db.exercises.count(), [], 0);
+  // Plans & exercises queries
   const plans = useLiveQuery(() => db.plans.toArray(), [], []);
-  const planMap = new Map(plans.map((p) => [p.id, p]));
+  const allExercises = useLiveQuery(() => db.exercises.toArray(), [], []);
+  const exerciseMap = useMemo(() => {
+    const map = new Map<string, Exercise>();
+    allExercises.forEach((e) => map.set(e.id, e));
+    return map;
+  }, [allExercises]);
 
-  // Completed workouts count
-  const completedCount = useLiveQuery(
-    () => db.workouts.where('status').equals('completed').count(),
+  const planMap = useMemo(() => new Map(plans.map((p) => [p.id, p])), [plans]);
+
+  // Recent completed workouts (last 3)
+  const recentWorkouts = useLiveQuery(
+    () => db.workouts.where('status').equals('completed').reverse().limit(3).toArray(),
     [],
-    0
+    []
   );
 
   // Resolve today's scheduled plan
@@ -102,24 +104,14 @@ export default function App() {
           {/* Logo & Brand */}
           <div
             onClick={() => setActiveTab('workout')}
-            className="flex items-center space-x-3 cursor-pointer"
+            className="flex items-center space-x-2.5 cursor-pointer"
           >
             <div className="w-8 h-8 bg-[#d9083c] flex items-center justify-center rounded-sm">
               <Dumbbell className="w-4 h-4 text-white stroke-[2.5]" />
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-lg tracking-tight leading-none text-[var(--text-color)]">
-                  GymLog
-                </span>
-                <span className="text-[10px] font-semibold tracking-wider uppercase text-[#d9083c] bg-[#d9083c]/10 px-1.5 py-0.5 rounded-sm">
-                  PWA
-                </span>
-              </div>
-              <p className="text-[11px] text-[var(--text-muted)] hidden sm:block">
-                Offline-First Strength Tracker
-              </p>
-            </div>
+            <span className="font-bold text-lg tracking-tight leading-none text-[var(--text-color)]">
+              GymLog
+            </span>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -187,168 +179,195 @@ export default function App() {
               onDiscardComplete={() => {}}
             />
           ) : (
-            /* No Workout Active: Dashboard & Today Schedule */
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Today's Workout Card */}
-              <div className="md:col-span-2 space-y-5">
-                <div className="flat-card p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-[#d9083c] rounded-full"></span>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                        Today's Scheduled Plan
-                      </span>
-                    </div>
-                    <span className="text-xs font-mono text-[var(--text-muted)]">
-                      {activeProgram ? activeProgram.name : 'Weekly Program'}
+            /* Clean, Actionable Workout Dashboard */
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Today's Scheduled Plan Card */}
+              <div className="flat-card p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 bg-[#d9083c] rounded-full animate-pulse" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Today's Scheduled Routine
                     </span>
                   </div>
+                  <span className="text-xs font-mono text-[var(--text-muted)]">
+                    {activeProgram ? activeProgram.name : 'Weekly Program'}
+                  </span>
+                </div>
 
-                  <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)] mb-2">
-                    {todayPlan?.name || 'Push Day A · Chest & Shoulders'}
-                  </h2>
-                  <p className="text-sm text-[var(--text-muted)] mb-5 max-w-lg">
-                    {todayPlan?.exercises.length || 5} movements configured with target sets, rep ranges, and rest intervals.
-                  </p>
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)]">
+                      {todayPlan?.name || 'Strength Session'}
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">
+                      {todayPlan?.exercises.length || 0} exercises scheduled for today's session
+                    </p>
+                  </div>
 
-                  <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[var(--border-color)]">
+                  <div className="flex items-center space-x-2">
                     <button
                       onClick={handleStartTodayPlan}
-                      className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5"
+                      className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5 shadow-lg"
                     >
                       <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>Start Scheduled Plan</span>
+                      <span>Start Workout</span>
                     </button>
                     <button
                       onClick={handleStartEmpty}
-                      className="btn-secondary flex items-center space-x-2 text-xs py-2.5 px-4"
+                      className="btn-secondary flex items-center space-x-1.5 text-xs py-2.5 px-4"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Start Empty</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('plans')}
-                      className="text-xs text-[var(--text-muted)] hover:text-white font-semibold ml-auto flex items-center space-x-1"
-                    >
-                      <Repeat className="w-3.5 h-3.5" />
-                      <span>Swap Plan</span>
+                      <span>Empty Session</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="flat-card p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Logged Sessions
+                {/* Movements list preview in today's plan */}
+                {todayPlan?.exercises && todayPlan.exercises.length > 0 && (
+                  <div className="pt-4 border-t border-[var(--border-color)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2.5">
+                      Scheduled Movements ({todayPlan.exercises.length})
                     </div>
-                    <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      {completedCount}{' '}
-                      <span className="text-xs text-[var(--text-muted)] font-normal">done</span>
-                    </div>
-                    <div className="text-[10px] text-emerald-500 font-semibold mt-1">
-                      Zero Data Loss
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {todayPlan.exercises.map((pe, idx) => {
+                        const ex = exerciseMap.get(pe.exerciseId);
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] text-xs"
+                          >
+                            <span className="font-medium text-[var(--text-color)] truncate pr-2">
+                              {ex?.name || 'Movement'}
+                            </span>
+                            <span className="font-mono text-[11px] text-[var(--text-muted)] whitespace-nowrap">
+                              {pe.targetSets || 3} sets
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
+              </div>
 
-                  <div className="flat-card p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Plans
-                    </div>
-                    <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      {plans.length}{' '}
-                      <span className="text-xs text-[var(--text-muted)] font-normal">templates</span>
-                    </div>
-                    <div className="text-[10px] text-[#d9083c] font-semibold mt-1">
-                      PPL + Power
-                    </div>
+              {/* Start from Saved Plans (Quick-Launch Cards) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-bold text-[var(--text-color)] tracking-tight">
+                      Start From a Plan
+                    </h3>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Launch any saved routine with target sets and prefilled weights
+                    </p>
                   </div>
+                  <button
+                    onClick={() => setActiveTab('plans')}
+                    className="text-xs font-semibold text-[#d9083c] hover:underline flex items-center space-x-1"
+                  >
+                    <span>View All Plans ({plans.length})</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-                  <div className="flat-card p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Library
-                    </div>
-                    <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      {exerciseCount || 200}{' '}
-                      <span className="text-xs text-[var(--text-muted)] font-normal">movements</span>
-                    </div>
-                    <div className="text-[10px] text-[var(--text-muted)] mt-1">
-                      200 Preloaded
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {plans.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flat-card p-4 flex flex-col justify-between space-y-3 hover:border-[#d9083c]/60 transition-colors group"
+                    >
+                      <div>
+                        <div className="font-bold text-sm text-[var(--text-color)] group-hover:text-[#d9083c] transition-colors">
+                          {p.name}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-muted)] mt-1">
+                          {p.exercises.length} movements
+                        </div>
+                        <div className="text-[10px] text-[var(--text-muted)] mt-2 line-clamp-2">
+                          {p.exercises
+                            .slice(0, 3)
+                            .map((pe) => exerciseMap.get(pe.exerciseId)?.name || 'Movement')
+                            .join(', ')}
+                        </div>
+                      </div>
 
-                  <div className="flat-card p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Progress
+                      <button
+                        onClick={async () => {
+                          await startWorkoutFromPlan(p.id);
+                          setActiveTab('workout');
+                        }}
+                        className="btn-primary w-full text-xs py-2 flex items-center justify-center space-x-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-white" />
+                        <span>Start Plan</span>
+                      </button>
                     </div>
-                    <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      Charts
-                    </div>
-                    <div className="text-[10px] text-emerald-400 font-semibold mt-1">
-                      PR Records
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Sidebar Panel */}
-              <div className="space-y-4">
-                <div className="flat-card p-5">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#d9083c]" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-color)]">
-                      Navigation & Features
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <button
-                      onClick={() => setActiveTab('progress')}
-                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
-                    >
-                      <span>Progress & Analytics</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('plans')}
-                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
-                    >
-                      <span>Plans & Templates ({plans.length})</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('calendar')}
-                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
-                    >
-                      <span>Calendar & Adherence</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('exercises')}
-                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
-                    >
-                      <span>Movement Library ({exerciseCount || 200})</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
-                    </button>
+              {/* Recent Activity */}
+              {recentWorkouts.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-[var(--text-color)] tracking-tight">
+                        Recent Activity
+                      </h3>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Your latest logged sessions
+                      </p>
+                    </div>
                     <button
                       onClick={() => setActiveTab('history')}
-                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
+                      className="text-xs font-semibold text-[var(--text-muted)] hover:text-white flex items-center space-x-1"
                     >
-                      <span>Workout History ({completedCount})</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
+                      <span>Full History</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </div>
 
-                <div className="flat-card p-5 border-[#d9083c]/30">
-                  <div className="flex items-center space-x-2 text-[#d9083c] mb-2">
-                    <Sparkles className="w-4 h-4" />
-                    <span className="text-xs font-semibold uppercase tracking-wider">PWA Architecture</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {recentWorkouts.map((w) => (
+                      <div
+                        key={w.id}
+                        className="flat-card p-4 flex items-center justify-between"
+                      >
+                        <div>
+                          <div className="font-bold text-xs text-[var(--text-color)]">
+                            {w.name}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-muted)] font-mono mt-0.5">
+                            {w.localDate}
+                            {w.summary?.durationSec
+                              ? ` · ${Math.floor(w.summary.durationSec / 60)} min`
+                              : ''}
+                          </div>
+                          {w.summary?.totalVolumeKg ? (
+                            <div className="text-[11px] font-mono text-[#d9083c] font-semibold mt-1">
+                              {w.summary.totalVolumeKg.toLocaleString()} kg · {w.summary.workingSets} sets
+                            </div>
+                          ) : null}
+                        </div>
+
+                        {w.planId && (
+                          <button
+                            onClick={async () => {
+                              await startWorkoutFromPlan(w.planId!);
+                              setActiveTab('workout');
+                            }}
+                            className="p-2 text-xs text-[var(--text-muted)] hover:text-white hover:bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] transition-colors"
+                            title="Repeat this workout"
+                          >
+                            <Repeat className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                    Zero network requests during training. Everything operates through Dexie IndexedDB with real-time reactive UI subscriptions.
-                  </p>
                 </div>
-              </div>
+              )}
             </div>
           )
         )}

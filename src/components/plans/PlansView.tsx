@@ -53,9 +53,9 @@ export function PlansView({ onStartPlanWorkout }: Props) {
     <div className="space-y-4 animate-in fade-in duration-200">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#2a2a2a]">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Workout Plans & Templates</h2>
+          <h2 className="text-xl font-bold text-white tracking-tight">Workout Plans</h2>
           <p className="text-xs text-[var(--text-muted)]">
-            Reusable training templates with preconfigured exercises, sets, and rep ranges
+            Reusable routines with preconfigured exercises, sets, rep targets, and rest intervals
           </p>
         </div>
 

@@ -301,7 +301,7 @@ export function CalendarView({ onStartWorkout }: Props) {
             {/* Scheduled Plan on this date */}
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
-                Scheduled Movement Template
+                Scheduled Plan
               </div>
               {selectedDay.scheduledPlanIds.length > 0 ? (
                 <div className="space-y-2">
