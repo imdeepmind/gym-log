@@ -52,6 +52,76 @@ export async function setActiveProgram(programId: ID): Promise<void> {
 }
 
 /**
+ * Updates an existing program.
+ */
+export async function updateProgram(programId: ID, changes: Partial<Program>): Promise<void> {
+  await db.programs.update(programId, {
+    ...changes,
+    updatedAt: Date.now(),
+  });
+}
+
+/**
+ * Creates a new Program and optionally activates it.
+ */
+export async function createProgram(program: Omit<Program, 'id' | 'createdAt' | 'updatedAt'>): Promise<Program> {
+  const newProgram: Program = {
+    ...program,
+    id: `prog_${Date.now()}`,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+
+  if (newProgram.isActive) {
+    await db.transaction('rw', db.programs, async () => {
+      const all = await db.programs.toArray();
+      for (const p of all) {
+        if (p.isActive) await db.programs.update(p.id, { isActive: false });
+      }
+      await db.programs.add(newProgram);
+    });
+  } else {
+    await db.programs.add(newProgram);
+  }
+
+  return newProgram;
+}
+
+/**
+ * Assigns or updates plans for a specific day slot (e.g. Sunday = 6) in a program.
+ */
+export async function setProgramDayPlans(
+  programId: ID,
+  dayIndex: number,
+  planIds: ID[],
+  label?: string
+): Promise<void> {
+  const prog = await db.programs.get(programId);
+  if (!prog) return;
+
+  const existingDays = [...prog.days];
+  const dayIdx = existingDays.findIndex((d) => d.dayIndex === dayIndex);
+  if (dayIdx >= 0) {
+    existingDays[dayIdx] = {
+      ...existingDays[dayIdx],
+      planIds,
+      label: label !== undefined ? label : existingDays[dayIdx].label,
+    };
+  } else {
+    existingDays.push({
+      dayIndex,
+      planIds,
+      label: label || `Day ${dayIndex + 1}`,
+    });
+  }
+
+  await db.programs.update(programId, {
+    days: existingDays,
+    updatedAt: Date.now(),
+  });
+}
+
+/**
  * Creates or updates a schedule override for a specific date (Skip or Replace).
  */
 export async function setScheduleOverride(
@@ -72,3 +142,4 @@ export async function setScheduleOverride(
 export async function removeScheduleOverride(dateStr: string): Promise<void> {
   await db.scheduleOverrides.delete(dateStr);
 }
+

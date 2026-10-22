@@ -4,7 +4,8 @@ import { db } from '@/db/schema';
 import { Plan, Exercise } from '@/types';
 import { startWorkoutFromPlan } from '@/services/plan';
 import { PlanEditorModal } from './PlanEditorModal';
-import { Plus, Play, Edit2, Copy, Trash2, Dumbbell, Layers } from 'lucide-react';
+import { ProgramScheduleModal } from './ProgramScheduleModal';
+import { Plus, Play, Edit2, Copy, Trash2, Dumbbell, Layers, Calendar } from 'lucide-react';
 
 interface Props {
   onStartPlanWorkout: (workout: any) => void;
@@ -13,6 +14,7 @@ interface Props {
 export function PlansView({ onStartPlanWorkout }: Props) {
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
   const plans = useLiveQuery(
     async () => {
@@ -59,16 +61,27 @@ export function PlansView({ onStartPlanWorkout }: Props) {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setEditingPlan(null);
-            setIsEditorOpen(true);
-          }}
-          className="btn-primary text-xs flex items-center space-x-1.5 py-2 px-3.5"
-        >
-          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>New Plan</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setIsScheduleOpen(true)}
+            className="btn-secondary text-xs flex items-center space-x-1.5 py-2 px-3.5"
+            title="Edit Weekly Program Split"
+          >
+            <Calendar className="w-3.5 h-3.5 text-[#d9083c]" />
+            <span>Weekly Split</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setEditingPlan(null);
+              setIsEditorOpen(true);
+            }}
+            className="btn-primary text-xs flex items-center space-x-1.5 py-2 px-3.5"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>New Plan</span>
+          </button>
+        </div>
       </div>
 
       {/* Grid of Plans */}
@@ -168,6 +181,11 @@ export function PlansView({ onStartPlanWorkout }: Props) {
         planToEdit={editingPlan}
         onClose={() => setIsEditorOpen(false)}
         onSave={() => {}}
+      />
+
+      <ProgramScheduleModal
+        isOpen={isScheduleOpen}
+        onClose={() => setIsScheduleOpen(false)}
       />
     </div>
   );

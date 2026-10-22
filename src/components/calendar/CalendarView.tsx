@@ -11,6 +11,7 @@ import {
 import { startWorkoutFromPlan } from '@/services/plan';
 import { startWorkout } from '@/services/workout';
 import { setScheduleOverride, removeScheduleOverride } from '@/services/program';
+import { ProgramScheduleModal } from '@/components/plans/ProgramScheduleModal';
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,7 @@ import {
   Flame,
   Award,
   AlertCircle,
+  Repeat,
 } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 
@@ -34,6 +36,7 @@ interface Props {
 export function CalendarView({ onStartWorkout }: Props) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDayInfo | null>(null);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
   // Load active program
   const activeProgram = useLiveQuery(
@@ -124,6 +127,14 @@ export function CalendarView({ onStartWorkout }: Props) {
         </div>
 
         <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setIsScheduleOpen(true)}
+            className="btn-secondary text-xs flex items-center space-x-1.5 py-1.5 px-3"
+            title="Edit Program Split & Schedule"
+          >
+            <CalendarIcon className="w-3.5 h-3.5 text-[#d9083c]" />
+            <span>Program Split</span>
+          </button>
           <button
             onClick={handleToday}
             className="btn-secondary text-xs py-1.5 px-3"
@@ -332,10 +343,49 @@ export function CalendarView({ onStartWorkout }: Props) {
                   })}
                 </div>
               ) : (
-                <div className="p-3 bg-[#121212] border border-[#2a2a2a] rounded-sm text-xs text-[var(--text-muted)]">
-                  Rest day (no workouts scheduled on this date)
+                <div className="p-3 bg-[#121212] border border-[#2a2a2a] rounded-sm text-xs text-[var(--text-muted)] flex items-center justify-between">
+                  <span>Rest day (no workouts scheduled)</span>
+                  <button
+                    onClick={() => {
+                      setSelectedDay(null);
+                      setIsScheduleOpen(true);
+                    }}
+                    className="text-[#d9083c] hover:underline font-semibold ml-2"
+                  >
+                    Edit Program Split →
+                  </button>
                 </div>
               )}
+
+              {/* Assign or Change Plan for this specific date */}
+              <div className="pt-2">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                  Assign or Override Plan for {selectedDay.dateStr}
+                </div>
+                <select
+                  value={selectedDay.scheduledPlanIds[0] || ''}
+                  onChange={async (e) => {
+                    const pid = e.target.value;
+                    if (pid) {
+                      await setScheduleOverride(selectedDay.dateStr, 'replace', [pid]);
+                    } else {
+                      await removeScheduleOverride(selectedDay.dateStr);
+                    }
+                  }}
+                  className="flat-input w-full py-1.5 px-2.5 text-xs bg-[#121212]"
+                >
+                  <option value="">
+                    {selectedDay.scheduledPlanIds.length > 0
+                      ? 'Revert to Program default...'
+                      : 'Rest Day (Select a Plan to schedule)'}
+                  </option>
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.exercises.length} exercises)
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Completed Workouts on this date if any */}
@@ -378,6 +428,12 @@ export function CalendarView({ onStartWorkout }: Props) {
           </div>
         </div>
       )}
+
+      {/* Program Schedule Modal */}
+      <ProgramScheduleModal
+        isOpen={isScheduleOpen}
+        onClose={() => setIsScheduleOpen(false)}
+      />
     </div>
   );
 }
