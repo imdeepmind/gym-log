@@ -1,90 +1,280 @@
-import React from 'react';
-import { Dumbbell, Flame, Trophy, Calendar, Settings as SettingsIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Dumbbell, 
+  Flame, 
+  Trophy, 
+  Calendar, 
+  Settings as SettingsIcon, 
+  Plus, 
+  Play, 
+  CheckCircle2, 
+  BarChart2, 
+  Clock, 
+  Folder,
+  Layers,
+  ArrowRight,
+  Sun,
+  Moon
+} from 'lucide-react';
 
 export default function App() {
-  return (
-    <div className="min-h-screen bg-surface-950 text-slate-100 flex flex-col font-sans">
-      {/* Mobile Top Header */}
-      <header className="sticky top-0 z-40 bg-surface-900/80 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-500 to-cyan-300 flex items-center justify-center shadow-glow">
-            <Dumbbell className="w-5 h-5 text-surface-950 stroke-[2.5]" />
-          </div>
-          <div>
-            <h1 className="font-extrabold text-base tracking-tight leading-none bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-              GymLog
-            </h1>
-            <p className="text-[10px] text-brand-400 font-semibold tracking-wider uppercase mt-0.5">
-              Offline First PWA
-            </p>
-          </div>
-        </div>
+  const [activeTab, setActiveTab] = useState<'workout' | 'calendar' | 'progress' | 'history' | 'settings'>('workout');
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-        <div className="flex items-center space-x-2">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-            Ready
-          </span>
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  };
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'dark bg-[#121212] text-[#f0f0f0]' : 'bg-[#ffffff] text-[#1a1a1a]'} flex flex-col font-sans transition-colors duration-200`}>
+      {/* Top Header - Responsive for Desktop & Mobile */}
+      <header className="sticky top-0 z-40 bg-[var(--card-bg)] border-b border-[var(--border-color)] px-4 lg:px-8 py-3 transition-colors duration-200">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          {/* Logo & Brand */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-[#d9083c] flex items-center justify-center rounded-sm">
+              <Dumbbell className="w-4 h-4 text-white stroke-[2.5]" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-lg tracking-tight leading-none text-[var(--text-color)]">
+                  GymLog
+                </span>
+                <span className="text-[10px] font-semibold tracking-wider uppercase text-[#d9083c] bg-[#d9083c]/10 px-1.5 py-0.5 rounded-sm">
+                  PWA
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)] hidden sm:block">
+                Offline-First Strength Tracker
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
+            {[
+              { id: 'workout', label: 'Workout', icon: Dumbbell },
+              { id: 'calendar', label: 'Calendar', icon: Calendar },
+              { id: 'progress', label: 'Progress', icon: Trophy },
+              { id: 'history', label: 'History', icon: Flame },
+              { id: 'settings', label: 'Settings', icon: SettingsIcon },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id as any)}
+                  className={`flex items-center space-x-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors ${
+                    isActive
+                      ? 'bg-[#d9083c] text-white'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)]'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Action Icons (Theme toggle + New Workout) */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)] rounded-sm transition-colors"
+              title="Toggle Theme"
+              aria-label="Toggle Theme"
+            >
+              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <button className="btn-primary flex items-center space-x-1.5 text-xs py-2 px-3.5">
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span className="hidden sm:inline">Start Workout</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-md w-full mx-auto p-4 pb-24 space-y-4">
-        {/* Project Setup Card */}
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden border border-brand-500/20">
-          <div className="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl pointer-events-none" />
+      {/* Main Content Area - Responsive Container for Desktop & Mobile */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-8 pb-24 md:pb-8">
+        {/* Responsive Grid: Left Column (Today / Active) & Right Column (Overview / Stats) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          <div className="flex items-center space-x-2 text-brand-400 mb-2">
-            <Flame className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wider">Setup Complete</span>
+          {/* Main Hero Card (Span 2 on Desktop) */}
+          <div className="md:col-span-2 space-y-5">
+            {/* Today's Workout Card - Flat Design */}
+            <div className="flat-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 bg-[#d9083c] rounded-full"></span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Today's Schedule
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-[var(--text-muted)]">
+                  Day 1 · Push Day
+                </span>
+              </div>
+
+              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)] mb-2">
+                Push Day A · Chest & Shoulders
+              </h2>
+              <p className="text-sm text-[var(--text-muted)] mb-5 max-w-lg">
+                5 exercises · Barbell Bench Press, Incline DB Press, Overhead Press, Lateral Raises, Cable Triceps Pushdown.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[var(--border-color)]">
+                <button className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5">
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>Start Scheduled Workout</span>
+                </button>
+                <button className="btn-secondary flex items-center space-x-2 text-xs py-2.5 px-4">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Start Empty</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="flat-card p-4">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  This Week
+                </div>
+                <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
+                  3 <span className="text-xs text-[var(--text-muted)] font-normal">/ 4 days</span>
+                </div>
+                <div className="text-[10px] text-[#d9083c] font-semibold mt-1">
+                  75% adherence
+                </div>
+              </div>
+
+              <div className="flat-card p-4">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  Streak
+                </div>
+                <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
+                  5 <span className="text-xs text-[var(--text-muted)] font-normal">weeks</span>
+                </div>
+                <div className="text-[10px] text-emerald-500 font-semibold mt-1">
+                  Consistent
+                </div>
+              </div>
+
+              <div className="flat-card p-4">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  Volume (7d)
+                </div>
+                <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
+                  18,450 <span className="text-xs text-[var(--text-muted)] font-normal">kg</span>
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] mt-1">
+                  +8% vs last week
+                </div>
+              </div>
+
+              <div className="flat-card p-4">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  Records
+                </div>
+                <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
+                  14 <span className="text-xs text-[var(--text-muted)] font-normal">PRs</span>
+                </div>
+                <div className="text-[10px] text-[#d9083c] font-semibold mt-1">
+                  2 this month
+                </div>
+              </div>
+            </div>
           </div>
 
-          <h2 className="text-xl font-bold tracking-tight text-white mb-1">
-            Strength Tracking Engine
-          </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Project initialized with Vite, React 18, TypeScript, Tailwind CSS, Dexie IndexedDB architecture, and PWA service worker.
-          </p>
-        </div>
+          {/* Sidebar / Secondary Panel (Span 1 on Desktop) */}
+          <div className="space-y-4">
+            {/* System Status / Architecture Card */}
+            <div className="flat-card p-5">
+              <div className="flex items-center space-x-2 mb-3">
+                <CheckCircle2 className="w-4 h-4 text-[#d9083c]" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-color)]">
+                  Design & Architecture
+                </span>
+              </div>
+              <ul className="space-y-2 text-xs text-[var(--text-muted)]">
+                <li className="flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
+                  <span>Primary Color</span>
+                  <span className="font-mono text-[#d9083c] font-bold">#d9083c</span>
+                </li>
+                <li className="flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
+                  <span>Style System</span>
+                  <span className="text-[var(--text-color)] font-medium">Flat Minimalist</span>
+                </li>
+                <li className="flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
+                  <span>Layout</span>
+                  <span className="text-[var(--text-color)] font-medium">Responsive Desktop + PWA</span>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>Storage</span>
+                  <span className="font-mono text-[var(--text-color)]">Dexie IndexedDB</span>
+                </li>
+              </ul>
+            </div>
 
-        {/* Status Highlights */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="glass-panel p-3.5 rounded-xl border border-white/5">
-            <div className="text-xs font-medium text-slate-400">Offline Database</div>
-            <div className="text-base font-bold text-white mt-1">IndexedDB / Dexie</div>
-            <div className="text-[11px] text-brand-400 mt-0.5 font-mono">Zero data loss</div>
+            {/* Quick Links Card */}
+            <div className="flat-card p-5">
+              <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+                Quick Access
+              </div>
+              <div className="space-y-1">
+                {[
+                  { label: 'Exercise Library (200 Exercises)', count: '200' },
+                  { label: 'Workout Plans & Templates', count: '4' },
+                  { label: 'Calendar Adherence Matrix', count: 'Oct 2026' },
+                  { label: 'Data Backup (Export / Import)', count: 'JSON' },
+                ].map((link, idx) => (
+                  <button
+                    key={idx}
+                    className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
+                  >
+                    <span>{link.label}</span>
+                    <span className="text-[11px] font-mono text-[#d9083c]">{link.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="glass-panel p-3.5 rounded-xl border border-white/5">
-            <div className="text-xs font-medium text-slate-400">PWA Target</div>
-            <div className="text-base font-bold text-white mt-1">Standalone</div>
-            <div className="text-[11px] text-emerald-400 mt-0.5 font-mono">Offline-ready</div>
-          </div>
+
         </div>
       </main>
 
-      {/* Bottom Navigation Placeholder */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-surface-900/90 backdrop-blur-lg border-t border-white/5 px-2 py-2 safe-bottom">
-        <div className="max-w-md mx-auto grid grid-cols-5 text-center text-xs">
-          <button className="flex flex-col items-center py-1.5 text-brand-400 font-medium">
-            <Dumbbell className="w-5 h-5 mb-1" />
-            <span>Workout</span>
-          </button>
-          <button className="flex flex-col items-center py-1.5 text-slate-400 hover:text-slate-200">
-            <Calendar className="w-5 h-5 mb-1" />
-            <span>Calendar</span>
-          </button>
-          <button className="flex flex-col items-center py-1.5 text-slate-400 hover:text-slate-200">
-            <Trophy className="w-5 h-5 mb-1" />
-            <span>Progress</span>
-          </button>
-          <button className="flex flex-col items-center py-1.5 text-slate-400 hover:text-slate-200">
-            <Flame className="w-5 h-5 mb-1" />
-            <span>History</span>
-          </button>
-          <button className="flex flex-col items-center py-1.5 text-slate-400 hover:text-slate-200">
-            <SettingsIcon className="w-5 h-5 mb-1" />
-            <span>Settings</span>
-          </button>
+      {/* Mobile Bottom Navigation - Visible on mobile/tablet */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)] border-t border-[var(--border-color)] px-2 py-2 safe-bottom transition-colors duration-200">
+        <div className="max-w-md mx-auto grid grid-cols-5 text-center text-[10px]">
+          {[
+            { id: 'workout', label: 'Workout', icon: Dumbbell },
+            { id: 'calendar', label: 'Calendar', icon: Calendar },
+            { id: 'progress', label: 'Progress', icon: Trophy },
+            { id: 'history', label: 'History', icon: Flame },
+            { id: 'settings', label: 'Settings', icon: SettingsIcon },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id as any)}
+                className={`flex flex-col items-center py-1 transition-colors ${
+                  isActive ? 'text-[#d9083c] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
+                }`}
+              >
+                <Icon className="w-4 h-4 mb-1" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
     </div>

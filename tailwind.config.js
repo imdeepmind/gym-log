@@ -8,42 +8,61 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#ecfeff',
-          100: '#cffafe',
-          200: '#a5f3fc',
-          300: '#67e8f9',
-          400: '#22d3ee',
-          500: '#06b6d4',
-          600: '#0891b2',
-          700: '#0e7490',
-          800: '#155e75',
-          900: '#164e63',
-          DEFAULT: '#06b6d4',
+        // Flat primary palette from todo.imdeepmind.com
+        primary: {
+          DEFAULT: '#d9083c',
+          50: '#fdf2f4',
+          100: '#fce7eb',
+          200: '#f9d2da',
+          300: '#f4a4b5',
+          400: '#ee6b88',
+          500: '#d9083c',
+          600: '#c50736',
+          700: '#a7062e',
+          800: '#8b0829',
+          900: '#760421',
+          light: '#f71d53',
+          lighter: '#f94e79',
+          dark: '#a7062e',
+          darker: '#760421',
         },
+        // Flat surfaces matching todo.imdeepmind.com
         surface: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#090d16',
-        },
-        accent: {
-          lime: '#84cc16',
-          amber: '#f59e0b',
-          rose: '#f43f5e',
-          violet: '#8b5cf6',
-          emerald: '#10b981',
+          bg: {
+            light: '#ffffff',
+            dark: '#121212',
+          },
+          card: {
+            light: '#ffffff',
+            dark: '#161616',
+          },
+          hover: {
+            light: '#f5f5f5',
+            dark: '#1e1e1e',
+          },
+          border: {
+            light: '#e0e0e0',
+            dark: '#2a2a2a',
+          },
+          text: {
+            light: '#1a1a1a',
+            dark: '#f0f0f0',
+          },
+          muted: {
+            light: '#888888',
+            dark: '#666666',
+          }
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
-      boxShadow: {
-        'glow': '0 0 20px -5px rgba(6, 182, 212, 0.4)',
-        'glow-lime': '0 0 20px -5px rgba(132, 204, 22, 0.4)',
+      borderRadius: {
+        'flat': '2px',
+        'sm': '4px',
+        'md': '6px',
+        'lg': '8px',
       }
     },
   },
