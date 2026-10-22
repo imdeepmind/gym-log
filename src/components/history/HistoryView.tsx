@@ -37,7 +37,7 @@ export function HistoryView() {
   const allExercises = useLiveQuery(() => db.exercises.toArray(), [], []);
   const exerciseMap = useMemo(() => {
     const map = new Map<string, Exercise>();
-    allExercises.forEach((ex) => exerciseMap.set(ex.id, ex));
+    allExercises.forEach((ex) => map.set(ex.id, ex));
     return map;
   }, [allExercises]);
 
