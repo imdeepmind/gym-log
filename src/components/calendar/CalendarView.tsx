@@ -37,7 +37,10 @@ export function CalendarView({ onStartWorkout }: Props) {
 
   // Load active program
   const activeProgram = useLiveQuery(
-    () => db.programs.where('isActive').equals(1 as any).first(),
+    async () => {
+      const all = await db.programs.toArray();
+      return all.find((p) => p.isActive);
+    },
     [],
     undefined
   );

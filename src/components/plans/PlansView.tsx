@@ -15,7 +15,10 @@ export function PlansView({ onStartPlanWorkout }: Props) {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const plans = useLiveQuery(
-    () => db.plans.where('isArchived').equals(0 as any).toArray(),
+    async () => {
+      const all = await db.plans.toArray();
+      return all.filter((p) => !p.isArchived);
+    },
     [],
     []
   );

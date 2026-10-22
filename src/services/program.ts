@@ -35,7 +35,8 @@ export async function initializeDefaultProgram() {
  * Gets currently active program.
  */
 export async function getActiveProgram(): Promise<Program | undefined> {
-  return await db.programs.where('isActive').equals(1 as any).first();
+  const all = await db.programs.toArray();
+  return all.find((p) => p.isActive);
 }
 
 /**
