@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateE1RM, calculateSetVolume, roundToIncrement } from './calc';
+import { addMuscleSets } from './muscles';
 
 describe('calculateE1RM', () => {
   it('returns weight when reps = 1', () => {
@@ -65,3 +66,19 @@ describe('roundToIncrement', () => {
     expect(roundToIncrement(178, 5)).toBe(180);
   });
 });
+
+describe('addMuscleSets', () => {
+  it('attributes 1.0 to primary muscle and 0.5 to secondary muscles', () => {
+    let acc: Partial<Record<string, number>> = {};
+    // Bench press: chest (primary), triceps & shoulders (secondary)
+    acc = addMuscleSets(acc, 'chest', ['triceps', 'shoulders']);
+    acc = addMuscleSets(acc, 'chest', ['triceps', 'shoulders']);
+    acc = addMuscleSets(acc, 'chest', ['triceps', 'shoulders']);
+
+    expect(acc['chest']).toBe(3.0);
+    expect(acc['triceps']).toBe(1.5);
+    expect(acc['shoulders']).toBe(1.5);
+  });
+});
+
+

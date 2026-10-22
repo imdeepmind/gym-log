@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { Muscle, Exercise, SetEntry } from '@/types';
-import { ALL_MUSCLES, MUSCLE_DEFINITIONS, getMuscleName, addMuscleSets } from '@/domain/muscles';
-import { subDays, parseISO, isAfter } from 'date-fns';
-import { Activity, X, Info } from 'lucide-react';
+import { Muscle, Exercise } from '@/types';
+import { ALL_MUSCLES, getMuscleName } from '@/domain/muscles';
+import { subDays, parseISO, startOfDay } from 'date-fns';
+import { X, Info } from 'lucide-react';
 
 interface Props {
   daysLookback?: number;
@@ -14,8 +14,12 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
   const [selectedMuscle, setSelectedMuscle] = useState<Muscle | null>(null);
   const [periodDays, setPeriodDays] = useState<number>(daysLookback);
 
-  // Load all workouts, sets, and exercises from Dexie
-  const workouts = useLiveQuery(() => db.workouts.where('status').equals('completed').toArray(), [], []);
+  // Load all workouts (completed or active), sets, and exercises from Dexie
+  const workouts = useLiveQuery(
+    () => db.workouts.filter((w) => w.status === 'completed' || w.status === 'in_progress').toArray(),
+    [],
+    []
+  );
   const allSets = useLiveQuery(() => db.sets.toArray(), [], []);
   const allExercises = useLiveQuery(() => db.exercises.toArray(), [], []);
 
@@ -27,8 +31,15 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
 
   // Filter workouts within the period
   const recentWorkouts = useMemo(() => {
-    const cutoff = subDays(new Date(), periodDays);
-    return workouts.filter((w) => isAfter(parseISO(w.localDate), cutoff));
+    const cutoff = startOfDay(subDays(new Date(), periodDays));
+    return workouts.filter((w) => {
+      try {
+        const d = parseISO(w.localDate);
+        return d >= cutoff;
+      } catch {
+        return false;
+      }
+    });
   }, [workouts, periodDays]);
 
   // Aggregate weighted set counts per muscle
@@ -47,33 +58,37 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
       (s) => s.completed && s.type !== 'warmup' && recentWorkoutIds.has(s.workoutId)
     );
 
-    // Group sets by workout and exercise
-    const workoutExerciseCounts = new Map<string, number>();
+    // Group sets by workout and exercise safely without fragile string splitting
+    const workoutExerciseCounts = new Map<string, { workoutId: string; exerciseId: string; count: number }>();
     for (const s of workingSets) {
-      const key = `${s.workoutId}_${s.exerciseId}`;
-      workoutExerciseCounts.set(key, (workoutExerciseCounts.get(key) || 0) + 1);
+      const key = `${s.workoutId}:::${s.exerciseId}`;
+      const existing = workoutExerciseCounts.get(key);
+      if (existing) {
+        existing.count++;
+      } else {
+        workoutExerciseCounts.set(key, { workoutId: s.workoutId, exerciseId: s.exerciseId, count: 1 });
+      }
     }
 
-    for (const [key, setCount] of workoutExerciseCounts.entries()) {
-      const [wId, exId] = key.split('_');
-      const ex = exerciseMap.get(exId);
-      const w = recentWorkoutMap.get(wId);
+    for (const item of workoutExerciseCounts.values()) {
+      const ex = exerciseMap.get(item.exerciseId);
+      const w = recentWorkoutMap.get(item.workoutId);
       if (!ex || !w) continue;
 
       // Primary muscle: 1.0 per set
-      counts[ex.primaryMuscle] = (counts[ex.primaryMuscle] || 0) + setCount * 1.0;
+      counts[ex.primaryMuscle] = (counts[ex.primaryMuscle] || 0) + item.count * 1.0;
       details[ex.primaryMuscle].push({
         exerciseName: ex.name,
-        sets: setCount,
+        sets: item.count,
         date: w.localDate,
       });
 
       // Secondary muscles: 0.5 per set
       for (const sec of ex.secondaryMuscles) {
-        counts[sec] = (counts[sec] || 0) + setCount * 0.5;
+        counts[sec] = (counts[sec] || 0) + item.count * 0.5;
         details[sec].push({
           exerciseName: `${ex.name} (Secondary)`,
-          sets: setCount * 0.5,
+          sets: item.count * 0.5,
           date: w.localDate,
         });
       }
@@ -82,13 +97,21 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
     return { muscleCounts: counts, muscleContributionDetails: details };
   }, [recentWorkouts, allSets, exerciseMap]);
 
-  // 4-step color scale matching #d9083c
+  // 4-step color scale matching #d9083c with visible contrast
   const getMuscleColor = (muscle: Muscle) => {
     const count = muscleCounts[muscle] || 0;
     if (count === 0) return '#1e1e1e';
-    if (count < 5) return '#760421';
-    if (count < 10) return '#a7062e';
-    return '#d9083c';
+    if (count < 5) return '#9e1035';   // Visible crimson for 1–4 sets
+    if (count < 10) return '#d9083c';  // Primary red for 5–9 sets
+    return '#ff3864';                  // Radiant highlight for 10+ sets
+  };
+
+  const getStroke = (muscle: Muscle) => {
+    return selectedMuscle === muscle ? '#ffffff' : '#2a2a2a';
+  };
+
+  const getStrokeWidth = (muscle: Muscle) => {
+    return selectedMuscle === muscle ? 2 : 0.75;
   };
 
   const selectedMuscleDetails = selectedMuscle ? muscleContributionDetails[selectedMuscle] || [] : [];
@@ -145,12 +168,16 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <path
                 d="M48 55 Q40 60 40 75 Q52 75 56 60 Z"
                 fill={getMuscleColor('shoulders')}
+                stroke={getStroke('shoulders')}
+                strokeWidth={getStrokeWidth('shoulders')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('shoulders')}
               />
               <path
                 d="M112 55 Q120 60 120 75 Q108 75 104 60 Z"
                 fill={getMuscleColor('shoulders')}
+                stroke={getStroke('shoulders')}
+                strokeWidth={getStrokeWidth('shoulders')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('shoulders')}
               />
@@ -159,12 +186,16 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <path
                 d="M56 55 L78 57 L78 85 L54 80 Z"
                 fill={getMuscleColor('chest')}
+                stroke={getStroke('chest')}
+                strokeWidth={getStrokeWidth('chest')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('chest')}
               />
               <path
                 d="M104 55 L82 57 L82 85 L106 80 Z"
                 fill={getMuscleColor('chest')}
+                stroke={getStroke('chest')}
+                strokeWidth={getStrokeWidth('chest')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('chest')}
               />
@@ -177,6 +208,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="28"
                 rx="4"
                 fill={getMuscleColor('biceps')}
+                stroke={getStroke('biceps')}
+                strokeWidth={getStrokeWidth('biceps')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('biceps')}
               />
@@ -187,6 +220,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="28"
                 rx="4"
                 fill={getMuscleColor('biceps')}
+                stroke={getStroke('biceps')}
+                strokeWidth={getStrokeWidth('biceps')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('biceps')}
               />
@@ -199,6 +234,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="35"
                 rx="3"
                 fill={getMuscleColor('forearms')}
+                stroke={getStroke('forearms')}
+                strokeWidth={getStrokeWidth('forearms')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('forearms')}
               />
@@ -209,6 +246,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="35"
                 rx="3"
                 fill={getMuscleColor('forearms')}
+                stroke={getStroke('forearms')}
+                strokeWidth={getStrokeWidth('forearms')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('forearms')}
               />
@@ -221,6 +260,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="45"
                 rx="3"
                 fill={getMuscleColor('abs')}
+                stroke={getStroke('abs')}
+                strokeWidth={getStrokeWidth('abs')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('abs')}
               />
@@ -229,12 +270,16 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <path
                 d="M54 88 L64 88 L64 130 L52 120 Z"
                 fill={getMuscleColor('obliques')}
+                stroke={getStroke('obliques')}
+                strokeWidth={getStrokeWidth('obliques')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('obliques')}
               />
               <path
                 d="M106 88 L96 88 L96 130 L108 120 Z"
                 fill={getMuscleColor('obliques')}
+                stroke={getStroke('obliques')}
+                strokeWidth={getStrokeWidth('obliques')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('obliques')}
               />
@@ -250,6 +295,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="65"
                 rx="6"
                 fill={getMuscleColor('quads')}
+                stroke={getStroke('quads')}
+                strokeWidth={getStrokeWidth('quads')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('quads')}
               />
@@ -260,6 +307,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="65"
                 rx="6"
                 fill={getMuscleColor('quads')}
+                stroke={getStroke('quads')}
+                strokeWidth={getStrokeWidth('quads')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('quads')}
               />
@@ -272,6 +321,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="55"
                 rx="4"
                 fill={getMuscleColor('calves')}
+                stroke={getStroke('calves')}
+                strokeWidth={getStrokeWidth('calves')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('calves')}
               />
@@ -282,6 +333,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="55"
                 rx="4"
                 fill={getMuscleColor('calves')}
+                stroke={getStroke('calves')}
+                strokeWidth={getStrokeWidth('calves')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('calves')}
               />
@@ -302,6 +355,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <polygon
                 points="80,45 60,65 80,85 100,65"
                 fill={getMuscleColor('traps')}
+                stroke={getStroke('traps')}
+                strokeWidth={getStrokeWidth('traps')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('traps')}
               />
@@ -310,6 +365,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <path
                 d="M52 65 L60 65 L80 85 L100 65 L108 65 L104 90 L56 90 Z"
                 fill={getMuscleColor('upper_back')}
+                stroke={getStroke('upper_back')}
+                strokeWidth={getStrokeWidth('upper_back')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('upper_back')}
               />
@@ -318,12 +375,16 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <path
                 d="M56 92 L75 92 L70 128 L50 115 Z"
                 fill={getMuscleColor('lats')}
+                stroke={getStroke('lats')}
+                strokeWidth={getStrokeWidth('lats')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('lats')}
               />
               <path
                 d="M104 92 L85 92 L90 128 L110 115 Z"
                 fill={getMuscleColor('lats')}
+                stroke={getStroke('lats')}
+                strokeWidth={getStrokeWidth('lats')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('lats')}
               />
@@ -336,6 +397,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="35"
                 rx="2"
                 fill={getMuscleColor('lower_back')}
+                stroke={getStroke('lower_back')}
+                strokeWidth={getStrokeWidth('lower_back')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('lower_back')}
               />
@@ -348,6 +411,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="32"
                 rx="4"
                 fill={getMuscleColor('triceps')}
+                stroke={getStroke('triceps')}
+                strokeWidth={getStrokeWidth('triceps')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('triceps')}
               />
@@ -358,6 +423,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="32"
                 rx="4"
                 fill={getMuscleColor('triceps')}
+                stroke={getStroke('triceps')}
+                strokeWidth={getStrokeWidth('triceps')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('triceps')}
               />
@@ -370,6 +437,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="28"
                 rx="6"
                 fill={getMuscleColor('glutes')}
+                stroke={getStroke('glutes')}
+                strokeWidth={getStrokeWidth('glutes')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('glutes')}
               />
@@ -380,6 +449,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="28"
                 rx="6"
                 fill={getMuscleColor('glutes')}
+                stroke={getStroke('glutes')}
+                strokeWidth={getStrokeWidth('glutes')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('glutes')}
               />
@@ -392,6 +463,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="60"
                 rx="6"
                 fill={getMuscleColor('hamstrings')}
+                stroke={getStroke('hamstrings')}
+                strokeWidth={getStrokeWidth('hamstrings')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('hamstrings')}
               />
@@ -402,6 +475,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="60"
                 rx="6"
                 fill={getMuscleColor('hamstrings')}
+                stroke={getStroke('hamstrings')}
+                strokeWidth={getStrokeWidth('hamstrings')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('hamstrings')}
               />
@@ -414,6 +489,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="55"
                 rx="5"
                 fill={getMuscleColor('calves')}
+                stroke={getStroke('calves')}
+                strokeWidth={getStrokeWidth('calves')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('calves')}
               />
@@ -424,6 +501,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 height="55"
                 rx="5"
                 fill={getMuscleColor('calves')}
+                stroke={getStroke('calves')}
+                strokeWidth={getStrokeWidth('calves')}
                 className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => setSelectedMuscle('calves')}
               />
@@ -479,7 +558,7 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
             <div className="p-6 bg-[#121212] border border-[#2a2a2a] rounded-sm text-center text-xs text-[var(--text-muted)] space-y-2">
               <Info className="w-6 h-6 mx-auto text-[#d9083c] opacity-60" />
               <div className="font-semibold text-white">Interactive Diagram</div>
-              <p>Click any muscle group on the front or back silhouette to inspect the exact exercises and set volume performed.</p>
+              <p>Click any muscle group on the front or back silhouette to inspect the exact movements and set volume performed.</p>
             </div>
           )}
 
@@ -492,13 +571,13 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               <div className="p-1.5 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-slate-400">
                 0 sets
               </div>
-              <div className="p-1.5 bg-[#760421] text-white rounded-sm font-semibold">
+              <div className="p-1.5 bg-[#9e1035] text-white rounded-sm font-semibold">
                 1–4 sets
               </div>
-              <div className="p-1.5 bg-[#a7062e] text-white rounded-sm font-semibold">
+              <div className="p-1.5 bg-[#d9083c] text-white rounded-sm font-semibold">
                 5–9 sets
               </div>
-              <div className="p-1.5 bg-[#d9083c] text-white rounded-sm font-semibold">
+              <div className="p-1.5 bg-[#ff3864] text-white rounded-sm font-semibold">
                 10+ sets
               </div>
             </div>
