@@ -12,6 +12,10 @@ import { HistoryView } from '@/components/history/HistoryView';
 import { ExercisesView } from '@/components/exercises/ExercisesView';
 import { SettingsView } from '@/components/settings/SettingsView';
 import { RestTimerBar } from '@/components/workout/RestTimerBar';
+
+const ProgressView = React.lazy(() =>
+  import('@/components/progress/ProgressView').then((m) => ({ default: m.ProgressView }))
+);
 import { 
   Dumbbell, 
   Flame, 
@@ -34,7 +38,7 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'workout' | 'plans' | 'calendar' | 'exercises' | 'history' | 'settings'>('workout');
+  const [activeTab, setActiveTab] = useState<'workout' | 'plans' | 'calendar' | 'progress' | 'exercises' | 'history' | 'settings'>('workout');
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Initialize DB seed exercises, default plans, and settings on mount
@@ -119,11 +123,12 @@ export default function App() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
+          <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5">
             {[
               { id: 'workout', label: 'Workout', icon: Dumbbell },
               { id: 'plans', label: 'Plans', icon: Layers },
               { id: 'calendar', label: 'Calendar', icon: Calendar },
+              { id: 'progress', label: 'Progress', icon: Trophy },
               { id: 'exercises', label: 'Movements', icon: BookOpen },
               { id: 'history', label: 'History', icon: Flame },
               { id: 'settings', label: 'Settings', icon: SettingsIcon },
@@ -274,13 +279,13 @@ export default function App() {
 
                   <div className="flat-card p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Adherence
+                      Progress
                     </div>
                     <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      Calendar
+                      Charts
                     </div>
                     <div className="text-[10px] text-emerald-400 font-semibold mt-1">
-                      Active Split
+                      PR Records
                     </div>
                   </div>
                 </div>
@@ -296,6 +301,13 @@ export default function App() {
                     </span>
                   </div>
                   <div className="space-y-1">
+                    <button
+                      onClick={() => setActiveTab('progress')}
+                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
+                    >
+                      <span>Progress & Analytics</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
+                    </button>
                     <button
                       onClick={() => setActiveTab('plans')}
                       className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
@@ -359,13 +371,26 @@ export default function App() {
           />
         )}
 
-        {/* TAB 4: EXERCISES */}
+        {/* TAB 4: PROGRESS & CHARTS (LAZY LOADED) */}
+        {activeTab === 'progress' && (
+          <React.Suspense
+            fallback={
+              <div className="p-12 text-center text-xs text-[var(--text-muted)] font-mono">
+                Loading analytics engine...
+              </div>
+            }
+          >
+            <ProgressView />
+          </React.Suspense>
+        )}
+
+        {/* TAB 5: EXERCISES */}
         {activeTab === 'exercises' && <ExercisesView />}
 
-        {/* TAB 5: HISTORY */}
+        {/* TAB 6: HISTORY */}
         {activeTab === 'history' && <HistoryView />}
 
-        {/* TAB 6: SETTINGS */}
+        {/* TAB 7: SETTINGS */}
         {activeTab === 'settings' && <SettingsView />}
       </main>
 
@@ -399,7 +424,7 @@ export default function App() {
             { id: 'workout', label: 'Workout', icon: Dumbbell },
             { id: 'plans', label: 'Plans', icon: Layers },
             { id: 'calendar', label: 'Calendar', icon: Calendar },
-            { id: 'exercises', label: 'Movements', icon: BookOpen },
+            { id: 'progress', label: 'Progress', icon: Trophy },
             { id: 'history', label: 'History', icon: Flame },
             { id: 'settings', label: 'Settings', icon: SettingsIcon },
           ].map((item) => {
