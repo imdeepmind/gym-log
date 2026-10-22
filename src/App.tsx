@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { startWorkout, getActiveWorkout } from '@/services/workout';
+import { startWorkoutFromPlan } from '@/services/plan';
+import { getActiveProgram } from '@/services/program';
+import { getScheduledPlansForDate } from '@/domain/schedule';
 import { ActiveWorkoutView } from '@/components/workout/ActiveWorkoutView';
+import { PlansView } from '@/components/plans/PlansView';
+import { CalendarView } from '@/components/calendar/CalendarView';
 import { HistoryView } from '@/components/history/HistoryView';
 import { ExercisesView } from '@/components/exercises/ExercisesView';
 import { SettingsView } from '@/components/settings/SettingsView';
@@ -24,14 +29,15 @@ import {
   Sun,
   Moon,
   BookOpen,
-  Sparkles
+  Sparkles,
+  Repeat
 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'workout' | 'exercises' | 'history' | 'settings'>('workout');
+  const [activeTab, setActiveTab] = useState<'workout' | 'plans' | 'calendar' | 'exercises' | 'history' | 'settings'>('workout');
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Initialize DB seed exercises and settings on mount
+  // Initialize DB seed exercises, default plans, and settings on mount
   useEffect(() => {
     db.initializeSeedAndSettings().catch(console.error);
   }, []);
@@ -39,15 +45,27 @@ export default function App() {
   // Reactive Dexie query for active in_progress workout
   const activeWorkout = useLiveQuery(() => getActiveWorkout(), [], undefined);
 
-  // Reactive Dexie query for total exercise count
-  const exerciseCount = useLiveQuery(() => db.exercises.count(), [], 0);
+  // Reactive Dexie query for active program
+  const activeProgram = useLiveQuery(() => getActiveProgram(), [], undefined);
+  const overrides = useLiveQuery(() => db.scheduleOverrides.toArray(), [], []);
 
-  // Reactive Dexie query for completed workouts count
+  // Total exercise count & plans
+  const exerciseCount = useLiveQuery(() => db.exercises.count(), [], 0);
+  const plans = useLiveQuery(() => db.plans.toArray(), [], []);
+  const planMap = new Map(plans.map((p) => [p.id, p]));
+
+  // Completed workouts count
   const completedCount = useLiveQuery(
     () => db.workouts.where('status').equals('completed').count(),
     [],
     0
   );
+
+  // Resolve today's scheduled plan
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayScheduledPlanIds = getScheduledPlansForDate(todayStr, activeProgram, overrides);
+  const todayPlanId = todayScheduledPlanIds.length > 0 ? todayScheduledPlanIds[0] : 'plan_push_a';
+  const todayPlan = planMap.get(todayPlanId) || planMap.get('plan_push_a');
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -63,8 +81,12 @@ export default function App() {
     setActiveTab('workout');
   };
 
-  const handleStartPushDay = async () => {
-    const w = await startWorkout('Push Day A · Chest & Shoulders');
+  const handleStartTodayPlan = async () => {
+    if (todayPlan) {
+      await startWorkoutFromPlan(todayPlan.id);
+    } else {
+      await startWorkout('Push Day A · Chest & Shoulders');
+    }
     setActiveTab('workout');
   };
 
@@ -100,6 +122,8 @@ export default function App() {
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
             {[
               { id: 'workout', label: 'Workout', icon: Dumbbell },
+              { id: 'plans', label: 'Plans', icon: Layers },
+              { id: 'calendar', label: 'Calendar', icon: Calendar },
               { id: 'exercises', label: 'Movements', icon: BookOpen },
               { id: 'history', label: 'History', icon: Flame },
               { id: 'settings', label: 'Settings', icon: SettingsIcon },
@@ -110,7 +134,7 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`flex items-center space-x-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors ${
                     isActive
                       ? 'bg-[#d9083c] text-white'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)]'
@@ -158,7 +182,7 @@ export default function App() {
               onDiscardComplete={() => {}}
             />
           ) : (
-            /* No Workout Active: Dashboard & Quick Start */
+            /* No Workout Active: Dashboard & Today Schedule */
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Today's Workout Card */}
               <div className="md:col-span-2 space-y-5">
@@ -167,28 +191,28 @@ export default function App() {
                     <div className="flex items-center space-x-2">
                       <span className="w-2 h-2 bg-[#d9083c] rounded-full"></span>
                       <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                        Today's Schedule
+                        Today's Scheduled Plan
                       </span>
                     </div>
                     <span className="text-xs font-mono text-[var(--text-muted)]">
-                      Day 1 · Push Day
+                      {activeProgram ? activeProgram.name : 'Weekly Program'}
                     </span>
                   </div>
 
                   <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)] mb-2">
-                    Push Day A · Chest & Shoulders
+                    {todayPlan?.name || 'Push Day A · Chest & Shoulders'}
                   </h2>
                   <p className="text-sm text-[var(--text-muted)] mb-5 max-w-lg">
-                    5 exercises · Barbell Bench Press, Incline DB Press, Overhead Press, Lateral Raises, Cable Triceps Pushdown.
+                    {todayPlan?.exercises.length || 5} movements configured with target sets, rep ranges, and rest intervals.
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[var(--border-color)]">
                     <button
-                      onClick={handleStartPushDay}
+                      onClick={handleStartTodayPlan}
                       className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5"
                     >
                       <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>Start Scheduled Workout</span>
+                      <span>Start Scheduled Plan</span>
                     </button>
                     <button
                       onClick={handleStartEmpty}
@@ -196,6 +220,13 @@ export default function App() {
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Start Empty</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('plans')}
+                      className="text-xs text-[var(--text-muted)] hover:text-white font-semibold ml-auto flex items-center space-x-1"
+                    >
+                      <Repeat className="w-3.5 h-3.5" />
+                      <span>Swap Plan</span>
                     </button>
                   </div>
                 </div>
@@ -217,38 +248,39 @@ export default function App() {
 
                   <div className="flat-card p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Plans
+                    </div>
+                    <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
+                      {plans.length}{' '}
+                      <span className="text-xs text-[var(--text-muted)] font-normal">templates</span>
+                    </div>
+                    <div className="text-[10px] text-[#d9083c] font-semibold mt-1">
+                      PPL + Power
+                    </div>
+                  </div>
+
+                  <div className="flat-card p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                       Library
                     </div>
                     <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
                       {exerciseCount || 200}{' '}
                       <span className="text-xs text-[var(--text-muted)] font-normal">movements</span>
                     </div>
-                    <div className="text-[10px] text-[#d9083c] font-semibold mt-1">
-                      Fully Preloaded
-                    </div>
-                  </div>
-
-                  <div className="flat-card p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Storage
-                    </div>
-                    <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      Local
-                    </div>
                     <div className="text-[10px] text-[var(--text-muted)] mt-1">
-                      IndexedDB Offline
+                      200 Preloaded
                     </div>
                   </div>
 
                   <div className="flat-card p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      Backups
+                      Adherence
                     </div>
                     <div className="text-2xl font-bold font-mono text-[var(--text-color)] mt-1">
-                      JSON
+                      Calendar
                     </div>
-                    <div className="text-[10px] text-[#d9083c] font-semibold mt-1">
-                      Export Anytime
+                    <div className="text-[10px] text-emerald-400 font-semibold mt-1">
+                      Active Split
                     </div>
                   </div>
                 </div>
@@ -260,10 +292,24 @@ export default function App() {
                   <div className="flex items-center space-x-2 mb-3">
                     <CheckCircle2 className="w-4 h-4 text-[#d9083c]" />
                     <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-color)]">
-                      Quick Access
+                      Navigation & Features
                     </span>
                   </div>
                   <div className="space-y-1">
+                    <button
+                      onClick={() => setActiveTab('plans')}
+                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
+                    >
+                      <span>Plans & Templates ({plans.length})</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('calendar')}
+                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
+                    >
+                      <span>Calendar & Adherence</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
+                    </button>
                     <button
                       onClick={() => setActiveTab('exercises')}
                       className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
@@ -275,14 +321,7 @@ export default function App() {
                       onClick={() => setActiveTab('history')}
                       className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
                     >
-                      <span>Completed History ({completedCount})</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('settings')}
-                      className="w-full flex items-center justify-between p-2 text-xs rounded-sm hover:bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors text-left"
-                    >
-                      <span>JSON Backup & Settings</span>
+                      <span>Workout History ({completedCount})</span>
                       <ArrowRight className="w-3.5 h-3.5 text-[#d9083c]" />
                     </button>
                   </div>
@@ -291,10 +330,10 @@ export default function App() {
                 <div className="flat-card p-5 border-[#d9083c]/30">
                   <div className="flex items-center space-x-2 text-[#d9083c] mb-2">
                     <Sparkles className="w-4 h-4" />
-                    <span className="text-xs font-semibold uppercase tracking-wider">PWA Features</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider">PWA Architecture</span>
                   </div>
                   <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                    Set completion feedback under 100ms. Live rest timers with audio alerts, screen wake lock during training, and instant persistence on every input change.
+                    Zero network requests during training. Everything operates through Dexie IndexedDB with real-time reactive UI subscriptions.
                   </p>
                 </div>
               </div>
@@ -302,13 +341,31 @@ export default function App() {
           )
         )}
 
-        {/* TAB 2: EXERCISES */}
+        {/* TAB 2: PLANS */}
+        {activeTab === 'plans' && (
+          <PlansView
+            onStartPlanWorkout={(w) => {
+              setActiveTab('workout');
+            }}
+          />
+        )}
+
+        {/* TAB 3: CALENDAR */}
+        {activeTab === 'calendar' && (
+          <CalendarView
+            onStartWorkout={(w) => {
+              setActiveTab('workout');
+            }}
+          />
+        )}
+
+        {/* TAB 4: EXERCISES */}
         {activeTab === 'exercises' && <ExercisesView />}
 
-        {/* TAB 3: HISTORY */}
+        {/* TAB 5: HISTORY */}
         {activeTab === 'history' && <HistoryView />}
 
-        {/* TAB 4: SETTINGS */}
+        {/* TAB 6: SETTINGS */}
         {activeTab === 'settings' && <SettingsView />}
       </main>
 
@@ -337,9 +394,11 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - Visible on mobile/tablet */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)] border-t border-[var(--border-color)] px-2 py-2 safe-bottom transition-colors duration-200">
-        <div className="max-w-md mx-auto grid grid-cols-4 text-center text-[10px]">
+        <div className="max-w-md mx-auto grid grid-cols-6 text-center text-[9px]">
           {[
             { id: 'workout', label: 'Workout', icon: Dumbbell },
+            { id: 'plans', label: 'Plans', icon: Layers },
+            { id: 'calendar', label: 'Calendar', icon: Calendar },
             { id: 'exercises', label: 'Movements', icon: BookOpen },
             { id: 'history', label: 'History', icon: Flame },
             { id: 'settings', label: 'Settings', icon: SettingsIcon },
@@ -354,7 +413,7 @@ export default function App() {
                   isActive ? 'text-[#d9083c] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
                 }`}
               >
-                <Icon className="w-4 h-4 mb-1" />
+                <Icon className="w-4 h-4 mb-0.5" />
                 <span>{item.label}</span>
               </button>
             );
