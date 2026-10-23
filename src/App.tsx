@@ -8,7 +8,6 @@ import { getActiveProgram } from '@/services/program';
 import { getScheduledPlansForDate } from '@/domain/schedule';
 import { ActiveWorkoutView } from '@/components/workout/ActiveWorkoutView';
 import { PlansView } from '@/components/plans/PlansView';
-import { CalendarView } from '@/components/calendar/CalendarView';
 import { HistoryView } from '@/components/history/HistoryView';
 import { ExercisesView } from '@/components/exercises/ExercisesView';
 import { SettingsView } from '@/components/settings/SettingsView';
@@ -127,8 +126,7 @@ export default function App() {
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5">
             {[
               { id: 'workout', label: 'Workout', icon: Dumbbell },
-              { id: 'plans', label: 'Plans', icon: Layers },
-              { id: 'calendar', label: 'Calendar', icon: Calendar },
+              { id: 'plans', label: 'Plans & Calendar', icon: Layers },
               { id: 'progress', label: 'Progress', icon: Trophy },
               { id: 'exercises', label: 'Movements', icon: BookOpen },
               { id: 'history', label: 'History', icon: Flame },
@@ -497,8 +495,8 @@ export default function App() {
           )
         )}
 
-        {/* TAB 2: PLANS */}
-        {activeTab === 'plans' && (
+        {/* TAB 2: PLANS & CALENDAR */}
+        {(activeTab === 'plans' || (activeTab as string) === 'calendar') && (
           <PlansView
             onStartPlanWorkout={(w) => {
               setActiveTab('workout');
@@ -506,16 +504,7 @@ export default function App() {
           />
         )}
 
-        {/* TAB 3: CALENDAR */}
-        {activeTab === 'calendar' && (
-          <CalendarView
-            onStartWorkout={(w) => {
-              setActiveTab('workout');
-            }}
-          />
-        )}
-
-        {/* TAB 4: PROGRESS & CHARTS (LAZY LOADED) */}
+        {/* TAB 3: PROGRESS & CHARTS (LAZY LOADED) */}
         {activeTab === 'progress' && (
           <React.Suspense
             fallback={
@@ -528,13 +517,13 @@ export default function App() {
           </React.Suspense>
         )}
 
-        {/* TAB 5: EXERCISES */}
+        {/* TAB 4: EXERCISES */}
         {activeTab === 'exercises' && <ExercisesView />}
 
-        {/* TAB 6: HISTORY */}
+        {/* TAB 5: HISTORY */}
         {activeTab === 'history' && <HistoryView />}
 
-        {/* TAB 7: SETTINGS */}
+        {/* TAB 6: SETTINGS */}
         {activeTab === 'settings' && <SettingsView />}
       </main>
 
@@ -563,17 +552,16 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - Visible on mobile/tablet */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)] border-t border-[var(--border-color)] px-2 py-2 safe-bottom transition-colors duration-200">
-        <div className="max-w-md mx-auto grid grid-cols-6 text-center text-[9px]">
+        <div className="max-w-md mx-auto grid grid-cols-5 text-center text-[9px]">
           {[
             { id: 'workout', label: 'Workout', icon: Dumbbell },
             { id: 'plans', label: 'Plans', icon: Layers },
-            { id: 'calendar', label: 'Calendar', icon: Calendar },
             { id: 'progress', label: 'Progress', icon: Trophy },
             { id: 'history', label: 'History', icon: Flame },
             { id: 'settings', label: 'Settings', icon: SettingsIcon },
           ].map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = activeTab === item.id || (item.id === 'plans' && (activeTab as string) === 'calendar');
             return (
               <button
                 key={item.id}
