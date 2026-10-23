@@ -36,7 +36,7 @@ export function RestTimerBar() {
   const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
   return (
-    <div className="fixed bottom-16 md:bottom-4 left-4 right-4 md:left-24 max-w-md md:max-w-lg mx-auto z-50 bg-[#161616] border border-[#d9083c] px-4 py-3 rounded-md shadow-2xl flex items-center justify-between text-[#f0f0f0] animate-in fade-in slide-in-from-bottom duration-200">
+    <div className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-md md:max-w-lg mx-auto z-50 bg-[#161616] border border-[#d9083c] px-4 py-3 rounded-md shadow-2xl flex items-center justify-between text-[#f0f0f0] animate-in fade-in slide-in-from-bottom duration-200">
       <div className="flex items-center space-x-3">
         <div className="w-8 h-8 rounded-sm bg-[#d9083c]/10 flex items-center justify-center text-[#d9083c]">
           <Timer className="w-4 h-4 animate-spin-slow" />

@@ -124,7 +124,7 @@ export default function App() {
 
       {/* Main Content Area - Responsive Container for Desktop & Mobile */}
       <div className="flex-1 flex flex-col md:ml-16">
-        <main className="flex-1 max-w-5xl w-full mx-auto p-4 lg:p-8 pb-24 md:pb-8">
+        <main className="flex-1 max-w-5xl w-full mx-auto p-4 lg:p-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-8">
         {/* TAB 1: WORKOUT */}
         {activeTab === 'workout' && (
           activeWorkout ? (
@@ -481,7 +481,7 @@ export default function App() {
       {activeWorkout && activeTab !== 'workout' && (
         <div
           onClick={() => setActiveTab('workout')}
-          className="fixed bottom-16 md:bottom-4 left-4 right-4 md:left-24 max-w-lg mx-auto z-40 bg-[#161616] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors"
+          className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-lg mx-auto z-40 bg-[#161616] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors"
         >
           <div className="flex items-center space-x-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#d9083c] animate-pulse" />
@@ -501,7 +501,7 @@ export default function App() {
       )}
 
       {/* Mobile Bottom Navigation - Visible on mobile/tablet */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)] border-t border-[var(--border-color)] px-2 py-2 safe-bottom transition-colors duration-200">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)] border-t border-[var(--border-color)] px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] transition-colors duration-200">
         <div className="max-w-md mx-auto grid grid-cols-5 text-center text-[9px]">
           {[
             { id: 'workout', label: 'Workout', icon: Dumbbell },

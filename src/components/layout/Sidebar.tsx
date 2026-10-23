@@ -30,7 +30,7 @@ export function Sidebar({
 
   return (
     <aside
-      className="hidden md:flex flex-col fixed top-14 left-0 bottom-0 w-16 bg-[var(--card-bg)] border-r border-[var(--border-color)] z-30 py-4 justify-between items-center transition-colors duration-200 select-none"
+      className="hidden md:flex flex-col fixed top-[calc(3.5rem+env(safe-area-inset-top,0px))] left-0 bottom-0 w-16 bg-[var(--card-bg)] border-r border-[var(--border-color)] z-30 py-4 justify-between items-center transition-colors duration-200 select-none"
       aria-label="Navigation Sidenav"
     >
       {/* Primary Navigation Icons */}

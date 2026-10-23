@@ -32,8 +32,8 @@ export function Header({
   onStartEmptyWorkout,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-[var(--card-bg)] border-b border-[var(--border-color)] px-4 lg:px-6 h-14 flex items-center transition-colors duration-200">
-      <div className="w-full flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-[var(--card-bg)] border-b border-[var(--border-color)] px-4 lg:px-6 pt-[env(safe-area-inset-top,0px)] transition-colors duration-200">
+      <div className="w-full h-14 flex items-center justify-between">
         {/* Logo & Brand Wordmark - WORKOUT */}
         <div
           onClick={() => onSelectTab('workout')}
