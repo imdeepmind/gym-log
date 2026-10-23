@@ -64,7 +64,7 @@ export async function exportSetsToCSV(): Promise<string> {
   return rows.join('\n');
 }
 
-export function downloadCSVFile(csvContent: string, filename: string = 'gymlog-workouts.csv') {
+export function downloadCSVFile(csvContent: string, filename: string = 'workout-workouts.csv') {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -77,7 +77,7 @@ export function downloadCSVFile(csvContent: string, filename: string = 'gymlog-w
 }
 
 /**
- * Imports workouts from Strong, Hevy, or GymLog CSV format.
+ * Imports workouts from Strong, Hevy, or Workout CSV format.
  */
 export async function importFromCSV(csvText: string): Promise<{ importedWorkouts: number; importedSets: number }> {
   const lines = csvText.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
@@ -88,7 +88,7 @@ export async function importFromCSV(csvText: string): Promise<{ importedWorkouts
   const exerciseLookup = new Map<string, Exercise>();
   allExercises.forEach((e) => exerciseLookup.set(e.name.toLowerCase().trim(), e));
 
-  // Determine format: GymLog, Strong, or Hevy
+  // Determine format: Workout, Strong, or Hevy
   const isStrong = headerLine.includes('workout name') && headerLine.includes('exercise name') && headerLine.includes('set order');
   const isHevy = headerLine.includes('title') && headerLine.includes('exercise_title');
 

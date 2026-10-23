@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'GymLog - Strength Workout Tracker',
-        short_name: 'GymLog',
+        name: 'Workout - Strength Workout Tracker',
+        short_name: 'Workout',
         description: 'Offline-first progressive web app for logging strength workouts with zero data loss.',
         theme_color: '#090d16',
         background_color: '#090d16',

@@ -101,7 +101,7 @@ export function SettingsView() {
       <div className="border-b border-[#2a2a2a] pb-2">
         <h2 className="text-xl font-bold text-white tracking-tight">App Settings</h2>
         <p className="text-xs text-[var(--text-muted)]">
-          Manage gym preferences, offline storage, and JSON backups
+          Manage workout preferences, offline storage, and JSON backups
         </p>
       </div>
 

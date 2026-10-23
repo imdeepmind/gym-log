@@ -12,6 +12,8 @@ import { HistoryView } from '@/components/history/HistoryView';
 import { ExercisesView } from '@/components/exercises/ExercisesView';
 import { SettingsView } from '@/components/settings/SettingsView';
 import { RestTimerBar } from '@/components/workout/RestTimerBar';
+import { Header, TabType } from '@/components/layout/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
 
 const ProgressView = React.lazy(() =>
   import('@/components/progress/ProgressView').then((m) => ({ default: m.ProgressView }))
@@ -26,15 +28,12 @@ import {
   Play, 
   Layers,
   ArrowRight,
-  Sun,
-  Moon,
-  BookOpen,
   Repeat,
   CheckCircle2
 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'workout' | 'plans' | 'calendar' | 'progress' | 'exercises' | 'history' | 'settings'>('workout');
+  const [activeTab, setActiveTab] = useState<TabType>('workout');
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Initialize DB seed exercises, default plans, and settings on mount
@@ -106,76 +105,26 @@ export default function App() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-[#121212] text-[#f0f0f0]' : 'bg-[#ffffff] text-[#1a1a1a]'} flex flex-col font-sans transition-colors duration-200`}>
-      {/* Top Header - Responsive for Desktop & Mobile */}
-      <header className="sticky top-0 z-40 bg-[var(--card-bg)] border-b border-[var(--border-color)] px-4 lg:px-8 py-3 transition-colors duration-200">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          {/* Logo & Brand */}
-          <div
-            onClick={() => setActiveTab('workout')}
-            className="flex items-center space-x-2.5 cursor-pointer"
-          >
-            <div className="w-8 h-8 bg-[#d9083c] flex items-center justify-center rounded-sm">
-              <Dumbbell className="w-4 h-4 text-white stroke-[2.5]" />
-            </div>
-            <span className="font-bold text-lg tracking-tight leading-none text-[var(--text-color)]">
-              GymLog
-            </span>
-          </div>
+      {/* Top Header - Across all viewports */}
+      <Header
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
+        hasActiveWorkout={!!activeWorkout}
+        onStartEmptyWorkout={handleStartEmpty}
+      />
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5">
-            {[
-              { id: 'workout', label: 'Workout', icon: Dumbbell },
-              { id: 'plans', label: 'Plans & Calendar', icon: Layers },
-              { id: 'progress', label: 'Progress', icon: Trophy },
-              { id: 'exercises', label: 'Movements', icon: BookOpen },
-              { id: 'history', label: 'History', icon: Flame },
-              { id: 'settings', label: 'Settings', icon: SettingsIcon },
-            ].map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors ${
-                    isActive
-                      ? 'bg-[#d9083c] text-white'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)]'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Action Icons (Theme toggle + New Workout) */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)] rounded-sm transition-colors"
-              title="Toggle Theme"
-              aria-label="Toggle Theme"
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-            {!activeWorkout && (
-              <button
-                onClick={handleStartEmpty}
-                className="btn-primary flex items-center space-x-1.5 text-xs py-2 px-3.5"
-              >
-                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span className="hidden sm:inline">Start Workout</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Left Sidenav Panel (Desktop, below top header) */}
+      <Sidebar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        hasActiveWorkout={!!activeWorkout}
+      />
 
       {/* Main Content Area - Responsive Container for Desktop & Mobile */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-8 pb-24 md:pb-8">
+      <div className="flex-1 flex flex-col md:ml-16">
+        <main className="flex-1 max-w-5xl w-full mx-auto p-4 lg:p-8 pb-24 md:pb-8">
         {/* TAB 1: WORKOUT */}
         {activeTab === 'workout' && (
           activeWorkout ? (
@@ -526,12 +475,13 @@ export default function App() {
         {/* TAB 6: SETTINGS */}
         {activeTab === 'settings' && <SettingsView />}
       </main>
+      </div>
 
       {/* Persistent Resume Mini Bar if active workout is in progress and viewing another tab */}
       {activeWorkout && activeTab !== 'workout' && (
         <div
           onClick={() => setActiveTab('workout')}
-          className="fixed bottom-16 md:bottom-4 left-4 right-4 max-w-lg mx-auto z-40 bg-[#161616] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors"
+          className="fixed bottom-16 md:bottom-4 left-4 right-4 md:left-24 max-w-lg mx-auto z-40 bg-[#161616] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors"
         >
           <div className="flex items-center space-x-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#d9083c] animate-pulse" />

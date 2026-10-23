@@ -32,7 +32,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   weekStart: 'monday',
 };
 
-export class GymLogDB extends Dexie {
+export class WorkoutDB extends Dexie {
   exercises!: Table<Exercise, string>;
   plans!: Table<Plan, string>;
   programs!: Table<Program, string>;
@@ -84,4 +84,5 @@ export class GymLogDB extends Dexie {
   }
 }
 
-export const db = new GymLogDB();
+export const db = new WorkoutDB();
+export const GymLogDB = WorkoutDB;

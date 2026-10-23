@@ -220,7 +220,7 @@ export interface AppSettings {
 }
 
 export interface BackupFile {
-  format: 'gymlog-backup';
+  format: 'workout-backup' | 'gymlog-backup';
   schemaVersion: number;
   appVersion: string;
   exportedAt: string;

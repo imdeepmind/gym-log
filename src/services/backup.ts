@@ -6,7 +6,7 @@ export const CURRENT_SCHEMA_VERSION = 1;
 export const APP_VERSION = '0.1.0';
 
 const backupSchema = z.object({
-  format: z.literal('gymlog-backup'),
+  format: z.union([z.literal('workout-backup'), z.literal('gymlog-backup')]),
   schemaVersion: z.number().max(CURRENT_SCHEMA_VERSION),
   appVersion: z.string(),
   exportedAt: z.string(),
@@ -24,7 +24,7 @@ const backupSchema = z.object({
 });
 
 /**
- * Generates and downloads a complete JSON backup of GymLog.
+ * Generates and downloads a complete JSON backup of Workout.
  */
 export async function exportJSONBackup(): Promise<BackupFile> {
   // Export only custom exercises or modified exercises
@@ -59,7 +59,7 @@ export async function exportJSONBackup(): Promise<BackupFile> {
   }
 
   const backup: BackupFile = {
-    format: 'gymlog-backup',
+    format: 'workout-backup',
     schemaVersion: CURRENT_SCHEMA_VERSION,
     appVersion: APP_VERSION,
     exportedAt: new Date().toISOString(),
@@ -92,7 +92,7 @@ export function downloadBackupFile(backup: BackupFile) {
   const dateStr = new Date().toISOString().slice(0, 10);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `gymlog-backup-${dateStr}.json`;
+  a.download = `workout-backup-${dateStr}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
