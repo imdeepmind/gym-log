@@ -66,7 +66,24 @@ export function ActiveWorkoutView({
 
     updateElapsed();
     const interval = setInterval(updateElapsed, 1000);
-    return () => clearInterval(interval);
+
+    // Instantly resync clock on foreground wake-up (switching back from other apps/music)
+    const handleWakeUp = () => {
+      if (document.visibilityState === 'visible') {
+        updateElapsed();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleWakeUp);
+    window.addEventListener('pageshow', handleWakeUp);
+    window.addEventListener('focus', handleWakeUp);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleWakeUp);
+      window.removeEventListener('pageshow', handleWakeUp);
+      window.removeEventListener('focus', handleWakeUp);
+    };
   }, [workout.startedAt]);
 
   const mins = Math.floor(elapsedSec / 60);

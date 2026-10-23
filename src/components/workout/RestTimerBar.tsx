@@ -17,14 +17,35 @@ export function RestTimerBar() {
       setRemainingSec(diff);
 
       if (diff === 0) {
-        playRestEndBeep();
+        // Only beep if the timer finished recently (within 3s), not after hours in background
+        const overdueSec = (Date.now() - endsAt) / 1000;
+        if (overdueSec <= 3) {
+          playRestEndBeep();
+        }
         skip();
       }
     };
 
     checkTime();
     const interval = setInterval(checkTime, 500);
-    return () => clearInterval(interval);
+
+    // Instantly resync or dismiss on foreground wake-up
+    const handleWakeUp = () => {
+      if (document.visibilityState === 'visible') {
+        checkTime();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleWakeUp);
+    window.addEventListener('pageshow', handleWakeUp);
+    window.addEventListener('focus', handleWakeUp);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleWakeUp);
+      window.removeEventListener('pageshow', handleWakeUp);
+      window.removeEventListener('focus', handleWakeUp);
+    };
   }, [active, endsAt, skip]);
 
   if (!active || remainingSec <= 0) {
