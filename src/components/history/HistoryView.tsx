@@ -15,8 +15,10 @@ import {
   X,
 } from 'lucide-react';
 import { getMuscleName, ALL_MUSCLES } from '@/domain/muscles';
+import { useConfirm } from '@/hooks/useConfirm';
 
 export function HistoryView() {
+  const confirm = useConfirm();
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMuscle, setFilterMuscle] = useState<string>('all');
@@ -102,7 +104,13 @@ export function HistoryView() {
 
   const handleDelete = async (e: React.MouseEvent, workoutId: string) => {
     e.stopPropagation();
-    if (confirm('Delete this workout permanently from your history?')) {
+    const ok = await confirm({
+      title: 'Delete Workout',
+      message: 'Delete this workout permanently from your history? All associated sets and logs will be permanently deleted.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (ok) {
       await db.transaction('rw', [db.workouts, db.workoutExercises, db.sets], async () => {
         await db.sets.where('workoutId').equals(workoutId).delete();
         await db.workoutExercises.where('workoutId').equals(workoutId).delete();

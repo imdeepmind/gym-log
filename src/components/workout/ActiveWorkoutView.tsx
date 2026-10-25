@@ -12,6 +12,7 @@ import { ExercisePickerModal } from './ExercisePickerModal';
 import { FinishSummaryModal } from './FinishSummaryModal';
 import { RestTimerBar } from './RestTimerBar';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { useConfirm } from '@/hooks/useConfirm';
 import {
   Clock,
   Plus,
@@ -36,6 +37,7 @@ export function ActiveWorkoutView({
 }: Props) {
   // Screen wake lock while workout is active
   useWakeLock(true);
+  const confirm = useConfirm();
 
   const [elapsedSec, setElapsedSec] = useState<number>(0);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -113,11 +115,14 @@ export function ActiveWorkoutView({
       .toArray();
 
     if (completedSets.length === 0) {
-      if (
-        confirm(
-          'No sets have been completed in this workout yet. Do you want to discard this workout instead?'
-        )
-      ) {
+      const ok = await confirm({
+        title: 'No Completed Sets',
+        message: 'No sets have been completed in this session yet. Do you want to discard this workout instead?',
+        confirmText: 'Discard Workout',
+        cancelText: 'Keep Editing',
+        variant: 'warning',
+      });
+      if (ok) {
         await discardWorkout(workout.id);
         if (onDiscardComplete) onDiscardComplete();
       }
@@ -130,7 +135,13 @@ export function ActiveWorkoutView({
   };
 
   const handleDiscard = async () => {
-    if (confirm('Discard this workout? All logged sets will be deleted.')) {
+    const ok = await confirm({
+      title: 'Discard Workout',
+      message: 'Are you sure you want to discard this workout? All logged sets and notes will be permanently deleted.',
+      confirmText: 'Discard',
+      variant: 'danger',
+    });
+    if (ok) {
       await discardWorkout(workout.id);
       if (onDiscardComplete) onDiscardComplete();
     }

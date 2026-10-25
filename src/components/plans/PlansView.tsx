@@ -16,12 +16,14 @@ import {
   Calendar,
   Sparkles,
 } from 'lucide-react';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface Props {
   onStartPlanWorkout: (workout: any) => void;
 }
 
 export function PlansView({ onStartPlanWorkout }: Props) {
+  const confirm = useConfirm();
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
@@ -59,7 +61,13 @@ export function PlansView({ onStartPlanWorkout }: Props) {
   };
 
   const handleDelete = async (planId: string, name: string) => {
-    if (confirm(`Delete plan "${name}"? Past workouts logged with this plan will remain intact.`)) {
+    const ok = await confirm({
+      title: 'Delete Plan',
+      message: `Delete plan "${name}"? Past workouts logged with this plan will remain intact in your history.`,
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (ok) {
       await db.plans.delete(planId);
     }
   };

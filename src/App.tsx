@@ -14,6 +14,7 @@ import { SettingsView } from '@/components/settings/SettingsView';
 import { RestTimerBar } from '@/components/workout/RestTimerBar';
 import { Header, TabType } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { ConfirmModal } from '@/components/common/ConfirmModal';
 
 const ProgressView = React.lazy(() =>
   import('@/components/progress/ProgressView').then((m) => ({ default: m.ProgressView }))
@@ -530,6 +531,9 @@ export default function App() {
 
       {/* Sticky Rest Timer Bar */}
       <RestTimerBar />
+
+      {/* Global Shared Confirmation Modal */}
+      <ConfirmModal />
     </div>
   );
 }

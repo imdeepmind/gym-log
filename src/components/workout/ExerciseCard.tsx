@@ -5,6 +5,7 @@ import { WorkoutExercise, Exercise, SetEntry, PRRecord } from '@/types';
 import { addSetToExercise, removeWorkoutExercise, getPreviousPerformanceSets } from '@/services/workout';
 import { SetRow } from './SetRow';
 import { Plus, MoreVertical, Trash2, Clock, MessageSquare, Repeat } from 'lucide-react';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface Props {
   workoutExercise: WorkoutExercise;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
+  const confirm = useConfirm();
   const [showNotes, setShowNotes] = useState(false);
   const [notesText, setNotesText] = useState(workoutExercise.notes || '');
 
@@ -47,7 +49,13 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
   };
 
   const handleRemove = async () => {
-    if (confirm(`Remove ${exercise.name} from this workout?`)) {
+    const ok = await confirm({
+      title: 'Remove Movement',
+      message: `Remove ${exercise?.name || 'this exercise'} and all its sets from this workout?`,
+      confirmText: 'Remove',
+      variant: 'danger',
+    });
+    if (ok) {
       await removeWorkoutExercise(workoutExercise.id);
     }
   };
