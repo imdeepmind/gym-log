@@ -152,7 +152,7 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
         <span className="flex-1 text-center">
           {exercise.trackingType === 'duration' ? 'Duration' : 'Weight & Reps'}
         </span>
-        <span className="w-16 text-right">Done</span>
+        <span className="w-20 text-right pr-1">Done</span>
       </div>
 
       {/* Set Rows */}

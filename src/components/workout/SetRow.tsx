@@ -194,12 +194,12 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
         )}
       </div>
 
-      {/* PR Badge if earned */}
-      <div className="w-16 flex items-center justify-end space-x-1">
+      {/* PR Badge & Complete Checkbox */}
+      <div className="w-20 flex items-center justify-end space-x-1.5 shrink-0">
         {prRecords.length > 0 && (
-          <span className="inline-flex items-center text-[10px] font-bold text-[#d9083c] bg-[#d9083c]/10 px-1.5 py-0.5 rounded-sm border border-[#d9083c]/30 animate-pulse">
-            <Trophy className="w-3 h-3 mr-0.5" />
-            PR
+          <span className="inline-flex items-center text-[10px] font-bold text-[#d9083c] bg-[#d9083c]/10 px-1.5 py-0.5 rounded-sm border border-[#d9083c]/30 animate-pulse shrink-0">
+            <Trophy className="w-3 h-3 mr-0.5 shrink-0" />
+            <span>PR</span>
           </span>
         )}
 
@@ -207,17 +207,17 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
         {previousSet && !set.completed && (
           <button
             onClick={handleCopyPrevious}
-            className="p-1 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm"
+            className="p-1 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm shrink-0"
             title="Copy previous performance"
           >
             <Copy className="w-3.5 h-3.5" />
           </button>
         )}
 
-        {/* Complete Checkbox - Matching todo.imdeepmind.com flat checkmark */}
+        {/* Complete Checkbox - Guaranteed square size with shrink-0 */}
         <button
           onClick={handleToggleComplete}
-          className={`w-7 h-7 rounded-sm border flex items-center justify-center transition-all ${
+          className={`w-7 h-7 shrink-0 rounded-sm border flex items-center justify-center transition-all ${
             set.completed
               ? 'bg-[#d9083c] border-[#d9083c] text-white'
               : 'border-[var(--border-color)] hover:border-[#d9083c] bg-[var(--card-bg)] text-[var(--text-color)]'
