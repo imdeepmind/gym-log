@@ -214,6 +214,7 @@ export interface AppSettings {
   wakeLockEnabled: boolean;
   soundEnabled: boolean;
   vibrateEnabled: boolean;
+  timerNotificationsEnabled?: boolean;
   lastBackupAt?: string;
   backupReminderDays: number;
   seedVersion: number;

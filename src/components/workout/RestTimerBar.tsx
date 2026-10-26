@@ -1,10 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useRestTimerStore, playRestEndBeep } from '@/hooks/useRestTimer';
-import { Timer, Plus, Minus, X } from 'lucide-react';
+import { useRestTimerStore } from '@/hooks/useRestTimer';
+import {
+  markRestTimerElapsed,
+  getNotificationPermission,
+  requestNotificationPermission,
+  sendTestNotification,
+} from '@/services/notifications';
+import { Timer, Plus, Minus, X, Bell, BellOff } from 'lucide-react';
 
 export function RestTimerBar() {
-  const { active, endsAt, exerciseName, adjust, skip } = useRestTimerStore();
+  const { active, endsAt, exerciseName, isBetweenExercise, adjust, skip } = useRestTimerStore();
   const [remainingSec, setRemainingSec] = useState<number>(0);
+  const [notifPerm, setNotifPerm] = useState<string>(getNotificationPermission());
+
+  useEffect(() => {
+    setNotifPerm(getNotificationPermission());
+  }, []);
+
+  const handleToggleNotification = async () => {
+    if (notifPerm === 'default') {
+      const result = await requestNotificationPermission();
+      setNotifPerm(result);
+      if (result === 'granted') {
+        await sendTestNotification();
+      }
+    } else if (notifPerm === 'granted') {
+      await sendTestNotification();
+    }
+  };
 
   useEffect(() => {
     if (!active || !endsAt) {
@@ -17,10 +40,10 @@ export function RestTimerBar() {
       setRemainingSec(diff);
 
       if (diff === 0) {
-        // Only beep if the timer finished recently (within 3s), not after hours in background
         const overdueSec = (Date.now() - endsAt) / 1000;
-        if (overdueSec <= 3) {
-          playRestEndBeep();
+        // Trigger alert if finished within 5 minutes (handles background tab delays)
+        if (overdueSec <= 300) {
+          markRestTimerElapsed(exerciseName, isBetweenExercise);
         }
         skip();
       }
@@ -29,7 +52,7 @@ export function RestTimerBar() {
     checkTime();
     const interval = setInterval(checkTime, 500);
 
-    // Instantly resync or dismiss on foreground wake-up
+    // Instantly resync or trigger on foreground wake-up
     const handleWakeUp = () => {
       if (document.visibilityState === 'visible') {
         checkTime();
@@ -46,7 +69,7 @@ export function RestTimerBar() {
       window.removeEventListener('pageshow', handleWakeUp);
       window.removeEventListener('focus', handleWakeUp);
     };
-  }, [active, endsAt, skip]);
+  }, [active, endsAt, exerciseName, isBetweenExercise, skip]);
 
   if (!active || remainingSec <= 0) {
     return null;
@@ -80,6 +103,28 @@ export function RestTimerBar() {
       </div>
 
       <div className="flex items-center space-x-1.5">
+        {notifPerm !== 'unsupported' && (
+          <button
+            onClick={handleToggleNotification}
+            className={`p-1.5 text-xs rounded-sm transition-colors ${
+              notifPerm === 'granted'
+                ? 'text-[#d9083c] hover:bg-[#d9083c]/10'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-color)] bg-[var(--hover-bg)]'
+            }`}
+            title={
+              notifPerm === 'granted'
+                ? 'Push notifications enabled (tap to test)'
+                : 'Tap to enable push notifications when timer ends'
+            }
+            aria-label="Toggle notifications"
+          >
+            {notifPerm === 'granted' ? (
+              <Bell className="w-4 h-4 fill-[#d9083c]/20" />
+            ) : (
+              <BellOff className="w-4 h-4" />
+            )}
+          </button>
+        )}
         <button
           onClick={() => adjust(-15)}
           className="p-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-color)] bg-[var(--hover-bg)] hover:bg-[var(--border-color)] rounded-sm transition-colors"

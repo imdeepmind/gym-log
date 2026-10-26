@@ -43,11 +43,11 @@ export function SetRow({
 
       if (isExerciseFinished) {
         // Special break time when this workout/exercise is completed
-        startRestTimer(betweenExerciseRest, exercise.name);
+        startRestTimer(betweenExerciseRest, exercise.name, true);
       } else {
         // Regular intra-set rest: takes configured break time for this workout/exercise
         const restSec = workoutExercise?.restSec || exercise.defaultRestSec || defaultRest;
-        startRestTimer(restSec, exercise.name);
+        startRestTimer(restSec, exercise.name, false);
       }
 
       if (prRecords.length > 0) {

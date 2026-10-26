@@ -28,6 +28,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   wakeLockEnabled: true,
   soundEnabled: true,
   vibrateEnabled: true,
+  timerNotificationsEnabled: true,
   seedVersion: 1,
   backupReminderDays: 14,
   weekStart: 'monday',
