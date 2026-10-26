@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { Workout, WorkoutSummary, PRRecord } from '@/types';
+import { Workout, WorkoutSummary, PRRecord, Exercise } from '@/types';
 import {
   finishWorkout,
   discardWorkout,
   addExerciseToWorkout,
 } from '@/services/workout';
+import { calculateSetVolume } from '@/domain/calc';
+import { kgToLb } from '@/domain/units';
 import { ExerciseCard } from './ExerciseCard';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { FinishSummaryModal } from './FinishSummaryModal';
-import { RestTimerBar } from './RestTimerBar';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useConfirm } from '@/hooks/useConfirm';
 import {
@@ -22,6 +23,7 @@ import {
   AlertCircle,
   Dumbbell,
   Play,
+  Activity,
 } from 'lucide-react';
 
 interface Props {
@@ -57,6 +59,68 @@ export function ActiveWorkoutView({
     [workout.id],
     []
   );
+
+  // Live query for all sets in this active workout
+  const allSets = useLiveQuery(
+    () => db.sets.where('workoutId').equals(workout.id).toArray(),
+    [workout.id],
+    []
+  );
+
+  // Live query for all exercises to attribute tracking types
+  const allExercises = useLiveQuery(() => db.exercises.toArray(), [], []);
+  const exerciseMap = useMemo(() => {
+    const map = new Map<string, Exercise>();
+    allExercises.forEach((e) => map.set(e.id, e));
+    return map;
+  }, [allExercises]);
+
+  // Live query for user unit preference
+  const settingsRecords = useLiveQuery(() => db.settings.toArray(), [], []);
+  const userUnit = useMemo(() => {
+    const record = settingsRecords.find((s) => s.key === 'unit');
+    return (record?.value as 'kg' | 'lb') || 'kg';
+  }, [settingsRecords]);
+
+  // Real-time calculated workout stats
+  const liveStats = useMemo(() => {
+    let totalVolumeKg = 0;
+    let totalReps = 0;
+    let completedSetsCount = 0;
+    const totalSetsCount = allSets.length;
+
+    for (const set of allSets) {
+      if (!set.completed) continue;
+
+      completedSetsCount++;
+      totalReps += set.reps || 0;
+
+      const ex = exerciseMap.get(set.exerciseId);
+      const trackingType = ex?.trackingType || 'weight_reps';
+      const vol = calculateSetVolume(
+        trackingType,
+        set.type,
+        set.weightKg,
+        set.reps,
+        workout.bodyweightKg
+      );
+      totalVolumeKg += vol;
+    }
+
+    const displayVolume =
+      userUnit === 'lb'
+        ? Math.round(kgToLb(totalVolumeKg) * 10) / 10
+        : Math.round(totalVolumeKg * 10) / 10;
+
+    return {
+      totalVolume: displayVolume,
+      totalVolumeKg,
+      totalReps,
+      completedSetsCount,
+      totalSetsCount,
+      unit: userUnit,
+    };
+  }, [allSets, exerciseMap, workout.bodyweightKg, userUnit]);
 
   // Live timer derived from now - startedAt per spec 7.2
   useEffect(() => {
@@ -161,7 +225,7 @@ export function ActiveWorkoutView({
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200 pb-24 sm:pb-20">
       {/* Sticky Top Bar for Active Workout Status */}
       <div className="flat-card p-4 flex flex-wrap items-center justify-between gap-3 border-[#d9083c]/40">
         <div className="flex-1 min-w-[200px]">
@@ -278,6 +342,54 @@ export function ActiveWorkoutView({
         </div>
       )}
 
+      {/* Live Session Totals Summary Card at bottom */}
+      {workoutExercises.length > 0 && (
+        <div className="flat-card p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-[#d9083c] animate-pulse" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-color)]">
+                Live Workout Stats
+              </h4>
+            </div>
+            <span className="text-[11px] font-mono text-[var(--text-muted)]">
+              {liveStats.completedSetsCount} of {liveStats.totalSetsCount} sets completed
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
+              <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
+                Total Weight
+              </div>
+              <div className="text-base sm:text-xl font-bold font-mono text-[#d9083c] mt-0.5">
+                {liveStats.totalVolume.toLocaleString()}{' '}
+                <span className="text-xs font-normal text-[var(--text-muted)]">{liveStats.unit}</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
+              <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
+                Total Reps
+              </div>
+              <div className="text-base sm:text-xl font-bold font-mono text-[var(--text-color)] mt-0.5">
+                {liveStats.totalReps}
+              </div>
+            </div>
+
+            <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
+              <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
+                Sets Done
+              </div>
+              <div className="text-base sm:text-xl font-bold font-mono text-[var(--text-color)] mt-0.5">
+                {liveStats.completedSetsCount}{' '}
+                <span className="text-xs font-normal text-[var(--text-muted)]">/ {liveStats.totalSetsCount}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Exercise Picker Modal */}
       <ExercisePickerModal
         isOpen={isPickerOpen}
@@ -300,8 +412,29 @@ export function ActiveWorkoutView({
         />
       )}
 
-      {/* Sticky Rest Timer Bar */}
-      <RestTimerBar />
+      {/* Sticky Bottom Live Stats Bar while workout is going on */}
+      <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:bottom-0 left-0 right-0 md:left-16 z-30 bg-[var(--card-bg)]/95 backdrop-blur-md border-t border-[var(--border-color)] px-4 py-2.5 shadow-lg">
+        <div className="max-w-2xl mx-auto flex items-center justify-around text-xs">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Weight:</span>
+            <span className="font-mono font-bold text-[#d9083c]">
+              {liveStats.totalVolume.toLocaleString()} {liveStats.unit}
+            </span>
+          </div>
+          <span className="text-[var(--border-color)]">|</span>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Reps:</span>
+            <span className="font-mono font-bold text-[var(--text-color)]">{liveStats.totalReps}</span>
+          </div>
+          <span className="text-[var(--border-color)]">|</span>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Sets:</span>
+            <span className="font-mono font-bold text-[var(--text-color)]">
+              {liveStats.completedSetsCount} / {liveStats.totalSetsCount}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
