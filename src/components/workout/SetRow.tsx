@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
-import { SetEntry, Exercise, SetType, PRRecord } from '@/types';
+import { SetEntry, Exercise, SetType, PRRecord, WorkoutExercise } from '@/types';
 import { toggleSetCompleted, updateSet, deleteSet } from '@/services/workout';
 import { useRestTimerStore } from '@/hooks/useRestTimer';
+import { db } from '@/db/schema';
 import { Check, Trophy, MoreVertical, Copy, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Props {
   set: SetEntry;
   exercise: Exercise;
+  workoutExercise?: WorkoutExercise;
+  allSets?: SetEntry[];
   previousSet?: SetEntry;
   onPRDetected?: (records: PRRecord[]) => void;
 }
 
-export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
+export function SetRow({
+  set,
+  exercise,
+  workoutExercise,
+  allSets,
+  previousSet,
+  onPRDetected,
+}: Props) {
   const [showMenu, setShowMenu] = useState(false);
   const [prRecords, setPrRecords] = useState<PRRecord[]>([]);
   const startRestTimer = useRestTimerStore((s) => s.start);
@@ -21,9 +31,24 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
     const { prRecords } = await toggleSetCompleted(set.id, nextState);
 
     if (nextState) {
-      // Start rest timer
-      const restSec = exercise.defaultRestSec || 90;
-      startRestTimer(restSec, exercise.name);
+      // Check if all sets for this exercise/workout are now completed
+      const otherSets = (allSets || []).filter((s) => s.id !== set.id);
+      const isExerciseFinished = otherSets.every((s) => s.completed);
+
+      // Fetch user settings for default rest and special between-exercise break
+      const settingsRecords = await db.settings.toArray();
+      const settingsMap = new Map(settingsRecords.map((s) => [s.key, s.value]));
+      const defaultRest = (settingsMap.get('defaultRestSec') as number) || 90;
+      const betweenExerciseRest = (settingsMap.get('betweenExerciseRestSec') as number) || 120;
+
+      if (isExerciseFinished) {
+        // Special break time when this workout/exercise is completed
+        startRestTimer(betweenExerciseRest, exercise.name);
+      } else {
+        // Regular intra-set rest: takes configured break time for this workout/exercise
+        const restSec = workoutExercise?.restSec || exercise.defaultRestSec || defaultRest;
+        startRestTimer(restSec, exercise.name);
+      }
 
       if (prRecords.length > 0) {
         setPrRecords(prRecords);

@@ -207,6 +207,7 @@ export interface AppSettings {
   unit: 'kg' | 'lb';
   theme: 'dark' | 'light' | 'system';
   defaultRestSec: number;
+  betweenExerciseRestSec: number; // Special rest interval when a workout/exercise is completed
   roundingIncrement: number; // e.g. 2.5 kg or 5 lb
   e1rmFormula: 'epley' | 'brzycki';
   includeBodyweightInVolume: boolean;

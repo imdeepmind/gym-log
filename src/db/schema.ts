@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   unit: 'kg',
   theme: 'dark',
   defaultRestSec: 90,
+  betweenExerciseRestSec: 120,
   roundingIncrement: 2.5,
   e1rmFormula: 'epley',
   includeBodyweightInVolume: false,

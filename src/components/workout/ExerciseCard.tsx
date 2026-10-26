@@ -162,6 +162,8 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
             key={set.id}
             set={set}
             exercise={exercise}
+            workoutExercise={workoutExercise}
+            allSets={sets}
             previousSet={previousPerformance[idx]}
             onPRDetected={onPRDetected}
           />

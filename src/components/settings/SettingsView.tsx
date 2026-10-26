@@ -12,6 +12,7 @@ export function SettingsView() {
   const unit = (settingsMap.get('unit') as 'kg' | 'lb') || 'kg';
   const rounding = (settingsMap.get('roundingIncrement') as number) || 2.5;
   const defaultRest = (settingsMap.get('defaultRestSec') as number) || 90;
+  const betweenExerciseRest = (settingsMap.get('betweenExerciseRestSec') as number) || 120;
   const e1rmFormula = (settingsMap.get('e1rmFormula') as 'epley' | 'brzycki') || 'epley';
   const lastBackupAt = settingsMap.get('lastBackupAt') as string | undefined;
 
@@ -150,7 +151,7 @@ export function SettingsView() {
         <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
           <div>
             <div className="text-sm font-semibold text-[var(--text-color)]">Default Rest Duration</div>
-            <div className="text-xs text-[var(--text-muted)]">Initial countdown when rest starts</div>
+            <div className="text-xs text-[var(--text-muted)]">Initial countdown between regular sets</div>
           </div>
           <select
             value={defaultRest}
@@ -161,6 +162,26 @@ export function SettingsView() {
             <option value="90">90 seconds (1.5 min)</option>
             <option value="120">120 seconds (2 min)</option>
             <option value="180">180 seconds (3 min)</option>
+          </select>
+        </div>
+
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
+          <div>
+            <div className="text-sm font-semibold text-[var(--text-color)]">Between-Exercise Break</div>
+            <div className="text-xs text-[var(--text-muted)]">Special rest time when a movement/exercise is finished</div>
+          </div>
+          <select
+            value={betweenExerciseRest}
+            onChange={(e) => handleUpdateSetting('betweenExerciseRestSec', parseInt(e.target.value, 10))}
+            className="flat-input text-xs py-1.5 px-3 bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
+          >
+            <option value="60">60 seconds (1 min)</option>
+            <option value="90">90 seconds (1.5 min)</option>
+            <option value="120">120 seconds (2 min - Standard)</option>
+            <option value="150">150 seconds (2.5 min)</option>
+            <option value="180">180 seconds (3 min)</option>
+            <option value="240">240 seconds (4 min)</option>
+            <option value="300">300 seconds (5 min)</option>
           </select>
         </div>
       </div>
