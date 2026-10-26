@@ -103,11 +103,11 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#161616] border border-[#2a2a2a] w-full max-w-2xl rounded-md flex flex-col max-h-[90vh] overflow-hidden text-[#f0f0f0] shadow-2xl">
+      <div className="bg-[var(--card-bg)] border border-[var(--border-color)] w-full max-w-2xl rounded-md flex flex-col max-h-[90vh] overflow-hidden text-[var(--text-color)] shadow-2xl">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#2a2a2a] flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[var(--border-color)] flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-lg text-white">
+            <h3 className="font-bold text-lg text-[var(--text-color)]">
               {planToEdit ? 'Edit Workout Plan' : 'Create Workout Plan'}
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
@@ -116,7 +116,7 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-[var(--text-muted)] hover:text-white rounded-sm hover:bg-[#1e1e1e]"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm hover:bg-[var(--hover-bg)]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -169,7 +169,7 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
 
             <div className="space-y-2">
               {exercises.length === 0 ? (
-                <div className="p-6 border border-dashed border-[#2a2a2a] text-center text-xs text-[var(--text-muted)] rounded-sm">
+                <div className="p-6 border border-dashed border-[var(--border-color)] text-center text-xs text-[var(--text-muted)] rounded-sm">
                   No movements added yet. Tap "Add Movement" to choose from 200 exercises.
                 </div>
               ) : (
@@ -178,19 +178,19 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
                   return (
                     <div
                       key={pe.id}
-                      className="p-3 bg-[#121212] border border-[#2a2a2a] rounded-sm space-y-2"
+                      className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="font-mono text-xs text-[var(--text-muted)]">#{idx + 1}</span>
-                          <span className="font-semibold text-sm text-white">{ex?.name || 'Exercise'}</span>
+                          <span className="font-semibold text-sm text-[var(--text-color)]">{ex?.name || 'Exercise'}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <button
                             type="button"
                             disabled={idx === 0}
                             onClick={() => handleMove(idx, 'up')}
-                            className="p-1 text-[var(--text-muted)] hover:text-white disabled:opacity-20"
+                            className="p-1 text-[var(--text-muted)] hover:text-[var(--text-color)] disabled:opacity-20"
                           >
                             <ArrowUp className="w-3.5 h-3.5" />
                           </button>
@@ -198,7 +198,7 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
                             type="button"
                             disabled={idx === exercises.length - 1}
                             onClick={() => handleMove(idx, 'down')}
-                            className="p-1 text-[var(--text-muted)] hover:text-white disabled:opacity-20"
+                            className="p-1 text-[var(--text-muted)] hover:text-[var(--text-color)] disabled:opacity-20"
                           >
                             <ArrowDown className="w-3.5 h-3.5" />
                           </button>
@@ -285,7 +285,7 @@ export function PlanEditorModal({ isOpen, planToEdit, onClose, onSave }: Props) 
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#2a2a2a] flex items-center justify-end space-x-3">
+          <div className="pt-3 border-t border-[var(--border-color)] flex items-center justify-end space-x-3">
             <button type="button" onClick={onClose} className="btn-secondary text-xs">
               Cancel
             </button>

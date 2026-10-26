@@ -120,15 +120,15 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#161616] border border-[#2a2a2a] w-full max-w-2xl rounded-md flex flex-col max-h-[90vh] text-[#f0f0f0] shadow-2xl">
+      <div className="bg-[var(--card-bg)] border border-[var(--border-color)] w-full max-w-2xl rounded-md flex flex-col max-h-[90vh] text-[var(--text-color)] shadow-2xl">
         {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-[#2a2a2a] flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[var(--border-color)] flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-sm bg-[#d9083c]/10 border border-[#d9083c]/30 flex items-center justify-center text-[#d9083c]">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-white">Program Split & Schedule</h3>
+              <h3 className="font-bold text-lg text-[var(--text-color)]">Program Split & Schedule</h3>
               <p className="text-xs text-[var(--text-muted)]">
                 Assign recurring workout plans to days of the week (e.g. Sunday) or set Rest days.
               </p>
@@ -136,7 +136,7 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-[var(--text-muted)] hover:text-white rounded-sm hover:bg-[#1e1e1e]"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm hover:bg-[var(--hover-bg)]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -181,14 +181,14 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
                     key={day.dayIndex}
                     className={`p-3 rounded-sm border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isSunday
-                        ? 'bg-[#1a1517] border-[#d9083c]/40'
-                        : 'bg-[#1a1a1a] border-[#2a2a2a]'
+                        ? 'bg-[#d9083c]/5 border-[#d9083c]/40'
+                        : 'bg-[var(--hover-bg)] border-[var(--border-color)]'
                     }`}
                   >
                     {/* Day Name & Label */}
                     <div className="min-w-[130px]">
                       <div className="flex items-center space-x-2">
-                        <span className="font-bold text-sm text-white">{dayName}</span>
+                        <span className="font-bold text-sm text-[var(--text-color)]">{dayName}</span>
                         {isSunday && (
                           <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded-sm bg-[#d9083c]/20 text-[#d9083c] font-semibold border border-[#d9083c]/40">
                             Sunday
@@ -200,7 +200,7 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
                         value={day.label}
                         onChange={(e) => handleLabelChange(day.dayIndex, e.target.value)}
                         placeholder="Day note/label"
-                        className="bg-transparent border-none text-[11px] text-[var(--text-muted)] focus:text-white p-0 mt-0.5 outline-none font-mono"
+                        className="bg-transparent border-none text-[11px] text-[var(--text-muted)] focus:text-[var(--text-color)] p-0 mt-0.5 outline-none font-mono"
                       />
                     </div>
 
@@ -211,8 +211,8 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
                         onChange={(e) => handlePlanChange(day.dayIndex, e.target.value)}
                         className={`flat-input w-full py-1.5 px-3 text-xs font-semibold ${
                           currentPlanId
-                            ? 'text-white border-[#d9083c]/50 bg-[#161616]'
-                            : 'text-[var(--text-muted)] bg-[#121212]'
+                            ? 'text-[var(--text-color)] border-[#d9083c]/50 bg-[var(--card-bg)]'
+                            : 'text-[var(--text-muted)] bg-[var(--card-bg)] border-[var(--border-color)]'
                         }`}
                       >
                         <option value="">Rest Day (No Workout)</option>
@@ -230,7 +230,7 @@ export function ProgramScheduleModal({ isOpen, onClose }: Props) {
           </div>
 
           {/* Modal Footer Actions */}
-          <div className="pt-4 border-t border-[#2a2a2a] flex items-center justify-between">
+          <div className="pt-4 border-t border-[var(--border-color)] flex items-center justify-between">
             <span className="text-xs text-[var(--text-muted)]">
               Changes update your calendar schedule and home screen immediately.
             </span>

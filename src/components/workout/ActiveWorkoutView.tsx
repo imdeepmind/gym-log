@@ -163,7 +163,7 @@ export function ActiveWorkoutView({
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Sticky Top Bar for Active Workout Status */}
-      <div className="flat-card p-4 bg-[#161616] flex flex-wrap items-center justify-between gap-3 border-[#d9083c]/40">
+      <div className="flat-card p-4 flex flex-wrap items-center justify-between gap-3 border-[#d9083c]/40">
         <div className="flex-1 min-w-[200px]">
           {isEditingName ? (
             <div className="flex items-center space-x-2">
@@ -174,7 +174,7 @@ export function ActiveWorkoutView({
                 onChange={(e) => setWorkoutName(e.target.value)}
                 onBlur={handleSaveName}
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                className="flat-input text-base font-bold text-white px-2 py-1"
+                className="flat-input text-base font-bold text-[var(--text-color)] px-2 py-1"
               />
               <button onClick={handleSaveName} className="btn-primary text-xs py-1 px-2.5">
                 Save
@@ -184,7 +184,7 @@ export function ActiveWorkoutView({
             <div className="flex items-center space-x-2">
               <h2
                 onClick={() => setIsEditingName(true)}
-                className="text-lg sm:text-xl font-bold tracking-tight text-white hover:text-[#d9083c] cursor-pointer flex items-center group transition-colors"
+                className="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-color)] hover:text-[#d9083c] cursor-pointer flex items-center group transition-colors"
               >
                 <span>{workout.name}</span>
                 <Edit2 className="w-3.5 h-3.5 ml-1.5 opacity-40 group-hover:opacity-100" />
@@ -208,7 +208,7 @@ export function ActiveWorkoutView({
             <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               Elapsed Time
             </div>
-            <div className="font-mono text-xl sm:text-2xl font-bold text-white tabular-nums">
+            <div className="font-mono text-xl sm:text-2xl font-bold text-[var(--text-color)] tabular-nums">
               {formattedTime}
             </div>
           </div>
@@ -217,7 +217,7 @@ export function ActiveWorkoutView({
           <div className="flex items-center space-x-2">
             <button
               onClick={handleDiscard}
-              className="p-2.5 text-xs text-[var(--text-muted)] hover:text-rose-500 bg-[#1e1e1e] hover:bg-rose-500/10 border border-[#2a2a2a] rounded-sm transition-colors"
+              className="p-2.5 text-xs text-[var(--text-muted)] hover:text-rose-500 bg-[var(--hover-bg)] hover:bg-rose-500/10 border border-[var(--border-color)] rounded-sm transition-colors"
               title="Discard Workout"
             >
               <Trash2 className="w-4 h-4" />
@@ -237,10 +237,10 @@ export function ActiveWorkoutView({
       <div className="space-y-4">
         {workoutExercises.length === 0 ? (
           <div className="flat-card p-10 text-center space-y-3">
-            <div className="w-12 h-12 rounded-sm bg-[#1e1e1e] border border-[#2a2a2a] flex items-center justify-center mx-auto text-[#d9083c]">
+            <div className="w-12 h-12 rounded-sm bg-[var(--hover-bg)] border border-[var(--border-color)] flex items-center justify-center mx-auto text-[#d9083c]">
               <Dumbbell className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">Empty Session</h3>
+            <h3 className="text-base font-bold text-[var(--text-color)]">Empty Session</h3>
             <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
               Add your first movement to start logging sets, weights, reps, and track personal records in real time.
             </p>

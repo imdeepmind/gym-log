@@ -119,10 +119,10 @@ export function WorkoutPage() {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
+                <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)] flex items-center space-x-2">
                   <span>{completedTodayWorkout.name}</span>
                 </h2>
-                <p className="text-xs text-emerald-400/90 mt-1">
+                <p className="text-xs text-emerald-500 font-medium mt-1">
                   Session finished · Great work completing your training today!
                 </p>
               </div>
@@ -137,7 +137,7 @@ export function WorkoutPage() {
                 </button>
                 <button
                   onClick={handleStartEmpty}
-                  className="btn-secondary flex items-center space-x-1.5 text-xs py-2 px-3 text-[var(--text-muted)] hover:text-white"
+                  className="btn-secondary flex items-center space-x-1.5 text-xs py-2 px-3 text-[var(--text-muted)] hover:text-[var(--text-color)]"
                   title="Start another workout session today"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -148,36 +148,36 @@ export function WorkoutPage() {
 
             {/* Today's Completed Session Stats */}
             {completedTodayWorkout.summary && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3 border-t border-[#2a2a2a]">
-                <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3 border-t border-[var(--border-color)]">
+                <div className="p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)]">
                   <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
                     Duration
                   </div>
-                  <div className="text-sm font-bold font-mono text-white mt-0.5">
+                  <div className="text-sm font-bold font-mono text-[var(--text-color)] mt-0.5">
                     {Math.floor(completedTodayWorkout.summary.durationSec / 60)} mins
                   </div>
                 </div>
-                <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                <div className="p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)]">
                   <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
                     Volume
                   </div>
-                  <div className="text-sm font-bold font-mono text-white mt-0.5">
+                  <div className="text-sm font-bold font-mono text-[var(--text-color)] mt-0.5">
                     {completedTodayWorkout.summary.totalVolumeKg.toLocaleString()} kg
                   </div>
                 </div>
-                <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                <div className="p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)]">
                   <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
                     Working Sets
                   </div>
-                  <div className="text-sm font-bold font-mono text-white mt-0.5">
+                  <div className="text-sm font-bold font-mono text-[var(--text-color)] mt-0.5">
                     {completedTodayWorkout.summary.workingSets} sets
                   </div>
                 </div>
-                <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
+                <div className="p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)]">
                   <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
                     Total Reps
                   </div>
-                  <div className="text-sm font-bold font-mono text-white mt-0.5">
+                  <div className="text-sm font-bold font-mono text-[var(--text-color)] mt-0.5">
                     {completedTodayWorkout.summary.totalReps} reps
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export function WorkoutPage() {
             </div>
             <button
               onClick={() => navigate('/history')}
-              className="text-xs font-semibold text-[var(--text-muted)] hover:text-white flex items-center space-x-1"
+              className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-color)] flex items-center space-x-1"
             >
               <span>Full History</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -373,7 +373,7 @@ export function WorkoutPage() {
                     onClick={async () => {
                       await startWorkoutFromPlan(w.planId!);
                     }}
-                    className="p-2 text-xs text-[var(--text-muted)] hover:text-white hover:bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] transition-colors"
+                    className="p-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] transition-colors"
                     title="Repeat this workout"
                   >
                     <Repeat className="w-3.5 h-3.5" />

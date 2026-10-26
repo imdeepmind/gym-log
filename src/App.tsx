@@ -26,11 +26,37 @@ import {
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('gym_theme');
+      if (saved) return saved === 'dark';
+      return document.documentElement.classList.contains('dark');
+    } catch {
+      return true;
+    }
+  });
+
+  // Sync theme class and persistence whenever isDarkMode changes
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('gym_theme', 'dark');
+      db.settings.put({ key: 'theme', value: 'dark' }).catch(() => {});
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('gym_theme', 'light');
+      db.settings.put({ key: 'theme', value: 'light' }).catch(() => {});
+    }
+  }, [isDarkMode]);
 
   // Initialize DB seed exercises, default plans, and settings on mount
   useEffect(() => {
-    db.initializeSeedAndSettings().catch(console.error);
+    db.initializeSeedAndSettings().then(async () => {
+      const themeSetting = await db.settings.get('theme');
+      if (themeSetting?.value) {
+        setIsDarkMode(themeSetting.value === 'dark');
+      }
+    }).catch(console.error);
   }, []);
 
   // Reactive Dexie query for active in_progress workout
@@ -48,12 +74,7 @@ export default function App() {
   }, [location.pathname]);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
+    setIsDarkMode((prev) => !prev);
   };
 
   const handleSelectTab = (tab: TabType) => {
@@ -78,7 +99,7 @@ export default function App() {
   ];
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'dark bg-[#121212] text-[#f0f0f0]' : 'bg-[#ffffff] text-[#1a1a1a]'} flex flex-col font-sans transition-colors duration-200`}>
+    <div className={`min-h-screen ${isDarkMode ? 'dark' : ''} bg-[var(--bg-color)] text-[var(--text-color)] flex flex-col font-sans transition-colors duration-200`}>
       {/* Top Header - Across all viewports */}
       <Header
         activeTab={activeTab}
@@ -117,12 +138,12 @@ export default function App() {
       {activeWorkout && location.pathname !== '/' && location.pathname !== '/workout' && (
         <div
           onClick={() => navigate('/')}
-          className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-lg mx-auto z-40 bg-[#161616] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors"
+          className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-lg mx-auto z-40 bg-[var(--card-bg)] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[var(--hover-bg)] transition-colors"
         >
           <div className="flex items-center space-x-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#d9083c] animate-pulse" />
             <div>
-              <div className="text-xs font-bold text-white tracking-tight">
+              <div className="text-xs font-bold text-[var(--text-color)] tracking-tight">
                 Resume Active Workout
               </div>
               <div className="text-[11px] text-[var(--text-muted)]">

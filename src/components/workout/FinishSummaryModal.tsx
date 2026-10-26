@@ -54,14 +54,14 @@ export function FinishSummaryModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-[#161616] border border-[#2a2a2a] w-full max-w-xl rounded-md p-6 text-[#f0f0f0] shadow-2xl my-auto space-y-5">
+      <div className="bg-[var(--card-bg)] border border-[var(--border-color)] w-full max-w-xl rounded-md p-6 text-[var(--text-color)] shadow-2xl my-auto space-y-5">
         {/* Header with celebration banner */}
         <div className="text-center space-y-1">
           <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-[#d9083c]/10 text-[#d9083c] border border-[#d9083c]/30 rounded-full text-xs font-semibold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Workout Completed</span>
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)] mt-1">
             {workout.name}
           </h2>
           <p className="text-xs text-[var(--text-muted)] font-mono">
@@ -80,9 +80,9 @@ export function FinishSummaryModal({
             </div>
             <div className="space-y-1">
               {prs.map((pr, idx) => (
-                <div key={idx} className="text-xs flex items-center justify-between text-slate-200">
+                <div key={idx} className="text-xs flex items-center justify-between text-[var(--text-color)]">
                   <span className="capitalize">{pr.kind.replace('_', ' ')}:</span>
-                  <span className="font-mono font-bold text-amber-300">
+                  <span className="font-mono font-bold text-amber-400">
                     {pr.value} {pr.kind === 'rep_pr' ? 'reps' : 'kg'}{' '}
                     {pr.previousValue && (
                       <span className="text-[10px] text-[var(--text-muted)] font-normal">
@@ -98,16 +98,16 @@ export function FinishSummaryModal({
 
         {/* Core Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="p-3 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-center">
+          <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
             <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
               Duration
             </div>
-            <div className="text-lg font-bold font-mono text-white mt-0.5">
+            <div className="text-lg font-bold font-mono text-[var(--text-color)] mt-0.5">
               {durationMins}m {durationSecs}s
             </div>
           </div>
 
-          <div className="p-3 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-center">
+          <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
             <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
               Total Volume
             </div>
@@ -117,20 +117,20 @@ export function FinishSummaryModal({
             </div>
           </div>
 
-          <div className="p-3 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-center">
+          <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
             <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
               Total Reps
             </div>
-            <div className="text-lg font-bold font-mono text-white mt-0.5">
+            <div className="text-lg font-bold font-mono text-[var(--text-color)] mt-0.5">
               {summary.totalReps}
             </div>
           </div>
 
-          <div className="p-3 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-center">
+          <div className="p-3 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-center">
             <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
               Sets
             </div>
-            <div className="text-lg font-bold font-mono text-white mt-0.5">
+            <div className="text-lg font-bold font-mono text-[var(--text-color)] mt-0.5">
               {summary.workingSets}{' '}
               {summary.warmupSets > 0 && (
                 <span className="text-xs text-amber-500 font-normal">
@@ -143,7 +143,7 @@ export function FinishSummaryModal({
 
         {/* Muscle Groups Trained Breakdown */}
         {muscleList.length > 0 && (
-          <div className="p-4 bg-[#1e1e1e]/60 border border-[#2a2a2a] rounded-sm space-y-2">
+          <div className="p-4 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm space-y-2">
             <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               Muscle Groups Trained (Weighted Sets)
             </div>
@@ -151,9 +151,9 @@ export function FinishSummaryModal({
               {muscleList.map(([muscle, count]) => (
                 <div
                   key={muscle}
-                  className="px-2.5 py-1 bg-[#161616] border border-[#2a2a2a] rounded-sm text-xs flex items-center space-x-1.5"
+                  className="px-2.5 py-1 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-sm text-xs flex items-center space-x-1.5"
                 >
-                  <span className="text-slate-300">{getMuscleName(muscle)}</span>
+                  <span className="text-[var(--text-color)]">{getMuscleName(muscle)}</span>
                   <span className="font-mono font-bold text-[#d9083c]">{count}</span>
                 </div>
               ))}
@@ -176,7 +176,7 @@ export function FinishSummaryModal({
                   className={`flex-1 py-1 text-xs font-bold rounded-sm border transition-colors ${
                     mood === lvl
                       ? 'bg-[#d9083c] border-[#d9083c] text-white'
-                      : 'bg-[#1e1e1e] border-[#2a2a2a] text-[var(--text-muted)] hover:text-white'
+                      : 'bg-[var(--card-bg)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-color)]'
                   }`}
                 >
                   {lvl}
@@ -198,7 +198,7 @@ export function FinishSummaryModal({
                   className={`flex-1 py-1 text-xs font-bold rounded-sm border transition-colors ${
                     energy === lvl
                       ? 'bg-amber-500 border-amber-500 text-black'
-                      : 'bg-[#1e1e1e] border-[#2a2a2a] text-[var(--text-muted)] hover:text-white'
+                      : 'bg-[var(--card-bg)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-color)]'
                   }`}
                 >
                   {lvl}
@@ -218,12 +218,12 @@ export function FinishSummaryModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="How did this workout feel? (e.g. felt strong on bench press, great mind-muscle connection)..."
-            className="flat-input w-full p-2.5 text-xs text-white resize-none"
+            className="flat-input w-full p-2.5 text-xs text-[var(--text-color)] bg-[var(--card-bg)] border-[var(--border-color)] resize-none"
           />
         </div>
 
         {/* Modal Done Action */}
-        <div className="pt-2 border-t border-[#2a2a2a] flex items-center justify-end space-x-3">
+        <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-end space-x-3">
           <button
             onClick={handleFinishDone}
             className="btn-primary w-full py-2.5 text-xs flex items-center justify-center space-x-2"

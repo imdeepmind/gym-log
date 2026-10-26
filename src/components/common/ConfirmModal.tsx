@@ -34,13 +34,13 @@ export function ConfirmModal() {
       aria-labelledby="confirm-modal-title"
     >
       <div
-        className="bg-[#181818] border border-[#2e2e2e] w-full max-w-sm sm:max-w-md rounded-lg p-5 sm:p-6 text-[#f0f0f0] shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 relative"
+        className="bg-[var(--card-bg)] border border-[var(--border-color)] w-full max-w-sm sm:max-w-md rounded-lg p-5 sm:p-6 text-[var(--text-color)] shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onCancel}
-          className="absolute top-4 right-4 p-1.5 text-[var(--text-muted)] hover:text-white hover:bg-[#252525] rounded transition-colors"
+          className="absolute top-4 right-4 p-1.5 text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)] rounded transition-colors"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
@@ -65,22 +65,22 @@ export function ConfirmModal() {
           <div className="flex-1 pr-4">
             <h3
               id="confirm-modal-title"
-              className="text-base font-bold text-white tracking-tight"
+              className="text-base font-bold text-[var(--text-color)] tracking-tight"
             >
               {options.title || 'Confirm Action'}
             </h3>
-            <p className="text-xs sm:text-sm text-[#a0a0a0] mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1.5 leading-relaxed">
               {options.message}
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-2.5 pt-3 border-t border-[#262626]">
+        <div className="flex items-center justify-end space-x-2.5 pt-3 border-t border-[var(--border-color)]">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] hover:text-white hover:bg-[#252525] rounded-md transition-colors"
+            className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)] rounded-md transition-colors"
           >
             {options.cancelText || 'Cancel'}
           </button>

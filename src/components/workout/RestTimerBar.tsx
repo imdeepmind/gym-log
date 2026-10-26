@@ -57,7 +57,7 @@ export function RestTimerBar() {
   const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
   return (
-    <div className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-md md:max-w-lg mx-auto z-50 bg-[#161616] border border-[#d9083c] px-4 py-3 rounded-md shadow-2xl flex items-center justify-between text-[#f0f0f0] animate-in fade-in slide-in-from-bottom duration-200">
+    <div className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-md md:max-w-lg mx-auto z-50 bg-[var(--card-bg)] border border-[#d9083c] px-4 py-3 rounded-md shadow-2xl flex items-center justify-between text-[var(--text-color)] animate-in fade-in slide-in-from-bottom duration-200">
       <div className="flex items-center space-x-3">
         <div className="w-8 h-8 rounded-sm bg-[#d9083c]/10 flex items-center justify-center text-[#d9083c]">
           <Timer className="w-4 h-4 animate-spin-slow" />
@@ -73,7 +73,7 @@ export function RestTimerBar() {
               </span>
             )}
           </div>
-          <div className="font-mono text-xl font-bold tracking-tight text-white tabular-nums">
+          <div className="font-mono text-xl font-bold tracking-tight text-[var(--text-color)] tabular-nums">
             {timeFormatted}
           </div>
         </div>
@@ -82,14 +82,14 @@ export function RestTimerBar() {
       <div className="flex items-center space-x-1.5">
         <button
           onClick={() => adjust(-15)}
-          className="p-1.5 text-xs text-[var(--text-muted)] hover:text-white bg-[#1e1e1e] hover:bg-[#2a2a2a] rounded-sm transition-colors"
+          className="p-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-color)] bg-[var(--hover-bg)] hover:bg-[var(--border-color)] rounded-sm transition-colors"
           title="-15s"
         >
           -15s
         </button>
         <button
           onClick={() => adjust(15)}
-          className="p-1.5 text-xs text-[var(--text-muted)] hover:text-white bg-[#1e1e1e] hover:bg-[#2a2a2a] rounded-sm transition-colors"
+          className="p-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-color)] bg-[var(--hover-bg)] hover:bg-[var(--border-color)] rounded-sm transition-colors"
           title="+15s"
         >
           +15s

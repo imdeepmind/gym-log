@@ -96,18 +96,18 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#161616] border border-[#2a2a2a] w-full max-w-2xl rounded-md flex flex-col max-h-[90vh] overflow-hidden text-[#f0f0f0] shadow-2xl">
+      <div className="bg-[var(--card-bg)] border border-[var(--border-color)] w-full max-w-2xl rounded-md flex flex-col max-h-[90vh] overflow-hidden text-[var(--text-color)] shadow-2xl">
         {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-[#2a2a2a] flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[var(--border-color)] flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-lg text-white">Select Exercise</h3>
+            <h3 className="font-bold text-lg text-[var(--text-color)]">Select Exercise</h3>
             <p className="text-xs text-[var(--text-muted)] mt-0.5">
               Choose from 200 standard movements or create your own
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-[var(--text-muted)] hover:text-white rounded-sm hover:bg-[#1e1e1e] transition-colors"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm hover:bg-[var(--hover-bg)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -144,7 +144,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
                 <select
                   value={customMuscle}
                   onChange={(e) => setCustomMuscle(e.target.value as Muscle)}
-                  className="flat-input w-full p-2 text-sm bg-[#161616]"
+                  className="flat-input w-full p-2 text-sm bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
                 >
                   {Object.entries(MUSCLE_DEFINITIONS).map(([id, info]) => (
                     <option key={id} value={id}>
@@ -161,7 +161,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
                 <select
                   value={customEquipment}
                   onChange={(e) => setCustomEquipment(e.target.value as Equipment)}
-                  className="flat-input w-full p-2 text-sm bg-[#161616]"
+                  className="flat-input w-full p-2 text-sm bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
                 >
                   <option value="barbell">Barbell</option>
                   <option value="dumbbell">Dumbbell</option>
@@ -182,7 +182,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
               <select
                 value={customTracking}
                 onChange={(e) => setCustomTracking(e.target.value as TrackingType)}
-                className="flat-input w-full p-2 text-sm bg-[#161616]"
+                className="flat-input w-full p-2 text-sm bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
               >
                 <option value="weight_reps">Weight & Reps (standard)</option>
                 <option value="bodyweight_reps">Bodyweight Reps (pushups, pullups)</option>
@@ -193,7 +193,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
               </select>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#2a2a2a]">
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[var(--border-color)]">
               <button
                 type="button"
                 onClick={() => setIsCreatingCustom(false)}
@@ -210,7 +210,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
           /* Exercise Search & List View */
           <>
             {/* Search Input & Action */}
-            <div className="p-4 border-b border-[#2a2a2a] space-y-3">
+            <div className="p-4 border-b border-[var(--border-color)] space-y-3">
               <div className="relative">
                 <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-3" />
                 <input
@@ -231,7 +231,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
                     className={`px-3 py-1 rounded-sm whitespace-nowrap uppercase tracking-wider text-[11px] font-semibold transition-colors ${
                       selectedCategory === cat
                         ? 'bg-[#d9083c] text-white'
-                        : 'bg-[#1e1e1e] text-[var(--text-muted)] hover:text-white'
+                        : 'bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] border border-[var(--border-color)]'
                     }`}
                   >
                     {cat}
@@ -246,7 +246,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
                   <select
                     value={selectedEquipment}
                     onChange={(e) => setSelectedEquipment(e.target.value as any)}
-                    className="flat-input text-xs py-1 px-2 bg-[#161616]"
+                    className="flat-input text-xs py-1 px-2 bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
                   >
                     <option value="all">All Equipment</option>
                     <option value="barbell">Barbell</option>
@@ -263,7 +263,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
                   <button
                     onClick={() => setOnlyFavorites(!onlyFavorites)}
                     className={`flex items-center space-x-1 px-2 py-1 rounded-sm transition-colors ${
-                      onlyFavorites ? 'bg-amber-500/20 text-amber-400' : 'text-[var(--text-muted)] hover:text-white'
+                      onlyFavorites ? 'bg-amber-500/20 text-amber-400' : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
                     }`}
                   >
                     <Star className={`w-3.5 h-3.5 ${onlyFavorites ? 'fill-amber-400' : ''}`} />
@@ -282,7 +282,7 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
             </div>
 
             {/* Exercises List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[#2a2a2a] p-1">
+            <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-color)] p-1">
               {filteredExercises.length === 0 ? (
                 <div className="p-8 text-center text-[var(--text-muted)] text-sm">
                   No movements found matching your filters.
@@ -300,18 +300,18 @@ export function ExercisePickerModal({ isOpen, onClose, onSelect }: Props) {
                   <div
                     key={ex.id}
                     onClick={() => {
-                      onSelect(ex.id);
+                       onSelect(ex.id);
                       onClose();
                     }}
-                    className="p-3 hover:bg-[#1e1e1e] flex items-center justify-between cursor-pointer transition-colors group"
+                    className="p-3 hover:bg-[var(--hover-bg)] flex items-center justify-between cursor-pointer transition-colors group"
                   >
                     <div className="flex-1 pr-3">
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-sm text-white group-hover:text-[#d9083c] transition-colors">
+                        <span className="font-semibold text-sm text-[var(--text-color)] group-hover:text-[#d9083c] transition-colors">
                           {ex.name}
                         </span>
                         {ex.isCustom && (
-                          <span className="text-[10px] font-mono uppercase bg-[#1e1e1e] text-[#d9083c] px-1.5 py-0.2 rounded-sm border border-[#d9083c]/30">
+                          <span className="text-[10px] font-mono uppercase bg-[var(--hover-bg)] text-[#d9083c] px-1.5 py-0.2 rounded-sm border border-[#d9083c]/30">
                             Custom
                           </span>
                         )}

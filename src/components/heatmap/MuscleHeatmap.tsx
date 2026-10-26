@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { Muscle, Exercise } from '@/types';
@@ -13,6 +13,18 @@ interface Props {
 export function MuscleHeatmap({ daysLookback = 7 }: Props) {
   const [selectedMuscle, setSelectedMuscle] = useState<Muscle | null>(null);
   const [periodDays, setPeriodDays] = useState<number>(daysLookback);
+
+  const [isDark, setIsDark] = useState(() => {
+    return typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true;
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Load all workouts (completed or active), sets, and exercises from Dexie
   const workouts = useLiveQuery(
@@ -97,18 +109,21 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
     return { muscleCounts: counts, muscleContributionDetails: details };
   }, [recentWorkouts, allSets, exerciseMap]);
 
-  // 4-step color scale matching #d9083c with visible contrast
+  // 4-step color scale matching #d9083c with visible contrast in both themes
   const getMuscleColor = (muscle: Muscle) => {
     const count = muscleCounts[muscle] || 0;
-    if (count === 0) return '#1e1e1e';
-    if (count < 5) return '#9e1035';   // Visible crimson for 1–4 sets
+    if (count === 0) return isDark ? '#1e1e1e' : '#e4e4e7';
+    if (count < 5) return isDark ? '#9e1035' : '#fda4af';   // Crimson / soft rose for 1–4 sets
     if (count < 10) return '#d9083c';  // Primary red for 5–9 sets
-    return '#ff3864';                  // Radiant highlight for 10+ sets
+    return isDark ? '#ff3864' : '#be123c';                  // Radiant highlight for 10+ sets
   };
 
   const getStroke = (muscle: Muscle) => {
-    return selectedMuscle === muscle ? '#ffffff' : '#2a2a2a';
+    if (selectedMuscle === muscle) return isDark ? '#ffffff' : '#18181b';
+    return isDark ? '#2a2a2a' : '#d4d4d8';
   };
+
+  const neutralFill = isDark ? '#2a2a2a' : '#d4d4d8';
 
   const getStrokeWidth = (muscle: Muscle) => {
     return selectedMuscle === muscle ? 2 : 0.75;
@@ -120,9 +135,9 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
   return (
     <div className="flat-card p-5 space-y-4">
       {/* Header and Period Selector */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2a2a2a] pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-3">
         <div>
-          <h3 className="text-base font-bold text-white tracking-tight flex items-center space-x-2">
+          <h3 className="text-base font-bold text-[var(--text-color)] tracking-tight flex items-center space-x-2">
             <span>Muscle Training Heatmap</span>
             <span className="text-[10px] font-mono uppercase bg-[#d9083c]/10 text-[#d9083c] border border-[#d9083c]/30 px-1.5 py-0.2 rounded-sm">
               Weighted Sets
@@ -133,7 +148,7 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
           </p>
         </div>
 
-        <div className="flex items-center space-x-1 bg-[#1e1e1e] p-1 rounded-sm border border-[#2a2a2a] text-xs font-semibold">
+        <div className="flex items-center space-x-1 bg-[var(--hover-bg)] p-1 rounded-sm border border-[var(--border-color)] text-xs font-semibold">
           {[7, 14, 30].map((d) => (
             <button
               key={d}
@@ -141,7 +156,7 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               className={`px-2.5 py-1 rounded-sm uppercase tracking-wider transition-colors ${
                 periodDays === d
                   ? 'bg-[#d9083c] text-white'
-                  : 'text-[var(--text-muted)] hover:text-white'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
               }`}
             >
               {d} Days
@@ -153,7 +168,7 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
       {/* SVG Diagram and Muscle Detail Split */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         {/* Interactive SVG Body Silhouettes (Front & Back) */}
-        <div className="flex items-center justify-center space-x-6 sm:space-x-10 p-4 bg-[#121212] rounded-md border border-[#2a2a2a]">
+        <div className="flex items-center justify-center space-x-6 sm:space-x-10 p-4 bg-[var(--hover-bg)]/40 rounded-md border border-[var(--border-color)]">
           {/* Front Body */}
           <div className="flex flex-col items-center">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
@@ -161,8 +176,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
             </span>
             <svg viewBox="0 0 160 320" className="w-36 h-72 select-none">
               {/* Head / Neck */}
-              <circle cx="80" cy="25" r="16" fill="#2a2a2a" />
-              <rect x="74" y="41" width="12" height="10" fill="#2a2a2a" />
+              <circle cx="80" cy="25" r="16" fill={neutralFill} />
+              <rect x="74" y="41" width="12" height="10" fill={neutralFill} />
 
               {/* Shoulders (Left & Right) */}
               <path
@@ -285,7 +300,7 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               />
 
               {/* Hips / Pelvis */}
-              <polygon points="56,134 104,134 94,155 66,155" fill="#222222" />
+              <polygon points="56,134 104,134 94,155 66,155" fill={neutralFill} />
 
               {/* Quadriceps (Thighs) */}
               <rect
@@ -348,8 +363,8 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
             </span>
             <svg viewBox="0 0 160 320" className="w-36 h-72 select-none">
               {/* Head */}
-              <circle cx="80" cy="25" r="16" fill="#2a2a2a" />
-              <rect x="74" y="41" width="12" height="10" fill="#2a2a2a" />
+              <circle cx="80" cy="25" r="16" fill={neutralFill} />
+              <rect x="74" y="41" width="12" height="10" fill={neutralFill} />
 
               {/* Traps */}
               <polygon
@@ -513,10 +528,10 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
         {/* Selected Muscle Inspector Panel */}
         <div className="space-y-3">
           {selectedMuscle ? (
-            <div className="p-4 bg-[#121212] border border-[#2a2a2a] rounded-sm space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#2a2a2a]">
+            <div className="p-4 bg-[var(--hover-bg)]/40 border border-[var(--border-color)] rounded-sm space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
                 <div>
-                  <h4 className="font-bold text-base text-white">
+                  <h4 className="font-bold text-base text-[var(--text-color)]">
                     {getMuscleName(selectedMuscle)}
                   </h4>
                   <div className="text-xs text-[#d9083c] font-mono font-semibold">
@@ -525,7 +540,7 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                 </div>
                 <button
                   onClick={() => setSelectedMuscle(null)}
-                  className="p-1 text-[var(--text-muted)] hover:text-white"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-color)]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -540,10 +555,10 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
                   {selectedMuscleDetails.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-2 bg-[#161616] border border-[#2a2a2a] rounded-sm text-xs flex items-center justify-between"
+                      className="p-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-sm text-xs flex items-center justify-between"
                     >
                       <div>
-                        <div className="font-semibold text-white">{item.exerciseName}</div>
+                        <div className="font-semibold text-[var(--text-color)]">{item.exerciseName}</div>
                         <div className="text-[10px] text-[var(--text-muted)] font-mono">{item.date}</div>
                       </div>
                       <span className="font-mono font-bold text-[#d9083c]">
@@ -555,20 +570,20 @@ export function MuscleHeatmap({ daysLookback = 7 }: Props) {
               )}
             </div>
           ) : (
-            <div className="p-6 bg-[#121212] border border-[#2a2a2a] rounded-sm text-center text-xs text-[var(--text-muted)] space-y-2">
+            <div className="p-6 bg-[var(--hover-bg)]/40 border border-[var(--border-color)] rounded-sm text-center text-xs text-[var(--text-muted)] space-y-2">
               <Info className="w-6 h-6 mx-auto text-[#d9083c] opacity-60" />
-              <div className="font-semibold text-white">Interactive Diagram</div>
+              <div className="font-semibold text-[var(--text-color)]">Interactive Diagram</div>
               <p>Click any muscle group on the front or back silhouette to inspect the exact movements and set volume performed.</p>
             </div>
           )}
 
           {/* Color Scale Legend */}
-          <div className="p-3 bg-[#121212] border border-[#2a2a2a] rounded-sm">
+          <div className="p-3 bg-[var(--hover-bg)]/40 border border-[var(--border-color)] rounded-sm">
             <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider mb-2">
               Weekly Volume Intensity Scale
             </div>
             <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
-              <div className="p-1.5 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-slate-400">
+              <div className="p-1.5 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-sm text-[var(--text-muted)] font-semibold">
                 0 sets
               </div>
               <div className="p-1.5 bg-[#9e1035] text-white rounded-sm font-semibold">

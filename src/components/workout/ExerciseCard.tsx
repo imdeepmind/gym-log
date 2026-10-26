@@ -68,10 +68,10 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
   return (
     <div className="flat-card mb-4 overflow-hidden">
       {/* Exercise Header */}
-      <div className="px-4 py-3 bg-[#161616] border-b border-[#2a2a2a] flex items-center justify-between">
+      <div className="px-4 py-3 bg-[var(--card-bg)] border-b border-[var(--border-color)] flex items-center justify-between">
         <div className="flex-1 pr-2">
           <div className="flex items-center space-x-2">
-            <h3 className="font-bold text-base text-white tracking-tight">
+            <h3 className="font-bold text-base text-[var(--text-color)] tracking-tight">
               {exercise.name}
             </h3>
             {workoutExercise.supersetGroup && (
@@ -104,7 +104,7 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
             className={`p-1.5 rounded-sm transition-colors ${
               showNotes || workoutExercise.notes
                 ? 'text-[#d9083c] bg-[#d9083c]/10'
-                : 'text-[var(--text-muted)] hover:text-white'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
             }`}
             title="Exercise notes"
           >
@@ -113,7 +113,7 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
           {onSwap && (
             <button
               onClick={() => onSwap(workoutExercise.id)}
-              className="p-1.5 text-[var(--text-muted)] hover:text-white rounded-sm transition-colors"
+              className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm transition-colors"
               title="Swap movement"
             >
               <Repeat className="w-4 h-4" />
@@ -131,13 +131,13 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
 
       {/* Optional Exercise Notes Form */}
       {showNotes && (
-        <div className="p-3 bg-[#1a1a1a] border-b border-[#2a2a2a] flex items-center space-x-2">
+        <div className="p-3 bg-[var(--hover-bg)] border-b border-[var(--border-color)] flex items-center space-x-2">
           <input
             type="text"
             placeholder="Notes for this exercise (e.g. pause at bottom, narrow grip)..."
             value={notesText}
             onChange={(e) => setNotesText(e.target.value)}
-            className="flat-input flex-1 p-1.5 text-xs text-white"
+            className="flat-input flex-1 p-1.5 text-xs text-[var(--text-color)]"
           />
           <button onClick={handleSaveNotes} className="btn-primary text-xs py-1.5 px-3">
             Save
@@ -146,7 +146,7 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
       )}
 
       {/* Set Rows Header */}
-      <div className="px-3 py-1.5 bg-[#121212]/80 border-b border-[#2a2a2a]/60 flex items-center justify-between text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+      <div className="px-3 py-1.5 bg-[var(--hover-bg)]/70 border-b border-[var(--border-color)] flex items-center justify-between text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
         <span className="w-8 text-left">Set</span>
         <span className="w-20 text-left hidden sm:block">Previous</span>
         <span className="flex-1 text-center">
@@ -156,7 +156,7 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
       </div>
 
       {/* Set Rows */}
-      <div className="divide-y divide-[#2a2a2a]/40">
+      <div className="divide-y divide-[var(--border-color)]">
         {sets.map((set, idx) => (
           <SetRow
             key={set.id}
@@ -169,10 +169,10 @@ export function ExerciseCard({ workoutExercise, onPRDetected, onSwap }: Props) {
       </div>
 
       {/* Add Set Button */}
-      <div className="p-2 bg-[#141414] border-t border-[#2a2a2a] flex items-center justify-between">
+      <div className="p-2 bg-[var(--card-bg)] border-t border-[var(--border-color)] flex items-center justify-between">
         <button
           onClick={handleAddSet}
-          className="w-full py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] hover:text-white hover:bg-[#1e1e1e] rounded-sm transition-colors flex items-center justify-center space-x-1"
+          className="w-full py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--hover-bg)] rounded-sm transition-colors flex items-center justify-center space-x-1"
         >
           <Plus className="w-3.5 h-3.5 text-[#d9083c]" />
           <span>Add Set</span>

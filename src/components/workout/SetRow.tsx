@@ -76,15 +76,15 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
 
   return (
     <div
-      className={`py-2 px-3 flex items-center justify-between text-xs transition-colors rounded-sm border-b border-[#2a2a2a]/60 ${
-        set.completed ? 'bg-emerald-500/5' : 'hover:bg-[#1e1e1e]/60'
+      className={`py-2 px-3 flex items-center justify-between text-xs transition-colors rounded-sm border-b border-[var(--border-color)] ${
+        set.completed ? 'bg-emerald-500/5' : 'hover:bg-[var(--hover-bg)]'
       }`}
     >
       {/* Set Number / Badge */}
       <div className="w-8 flex items-center justify-start space-x-1">
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="w-6 h-6 rounded-sm bg-[#1e1e1e] border border-[#2a2a2a] flex items-center justify-center font-mono text-[11px] font-semibold text-[var(--text-muted)] hover:text-white"
+          className="w-6 h-6 rounded-sm bg-[var(--hover-bg)] border border-[var(--border-color)] flex items-center justify-center font-mono text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-color)]"
           title="Change set type or notes"
         >
           {getSetBadge(set.type, set.order)}
@@ -111,7 +111,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
           <div className="flex items-center space-x-1">
             <button
               onClick={() => handleDurationChange((set.durationSec || 0) - 5)}
-              className="w-6 h-6 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-xs font-bold text-[var(--text-muted)] hover:text-white"
+              className="w-6 h-6 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-xs font-bold text-[var(--text-color)] hover:bg-[var(--border-color)] transition-colors"
             >
               -
             </button>
@@ -121,12 +121,12 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
               placeholder="Secs"
               value={set.durationSec ?? ''}
               onChange={(e) => handleDurationChange(parseFloat(e.target.value) || 0)}
-              className="w-16 p-1 text-center font-mono text-sm bg-transparent border-b border-[#2a2a2a] focus:border-[#d9083c] outline-none text-white"
+              className="w-16 p-1 text-center font-mono text-sm bg-transparent border-b border-[var(--border-color)] focus:border-[#d9083c] outline-none text-[var(--text-color)]"
             />
             <span className="text-[10px] text-[var(--text-muted)] font-mono">s</span>
             <button
               onClick={() => handleDurationChange((set.durationSec || 0) + 5)}
-              className="w-6 h-6 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-xs font-bold text-[var(--text-muted)] hover:text-white"
+              className="w-6 h-6 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-xs font-bold text-[var(--text-color)] hover:bg-[var(--border-color)] transition-colors"
             >
               +
             </button>
@@ -139,7 +139,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
               <div className="flex items-center space-x-1">
                 <button
                   onClick={() => handleWeightChange((set.weightKg || 0) - 2.5)}
-                  className="w-5 h-6 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-xs font-bold text-[var(--text-muted)] hover:text-white"
+                  className="w-5 h-6 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-xs font-bold text-[var(--text-color)] hover:bg-[var(--border-color)] transition-colors"
                   title="-2.5 kg"
                 >
                   -
@@ -151,11 +151,11 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
                   placeholder="kg"
                   value={set.weightKg ?? ''}
                   onChange={(e) => handleWeightChange(parseFloat(e.target.value) || 0)}
-                  className="w-14 p-1 text-center font-mono text-sm bg-transparent border-b border-[#2a2a2a] focus:border-[#d9083c] outline-none text-white tabular-nums"
+                  className="w-14 p-1 text-center font-mono text-sm bg-transparent border-b border-[var(--border-color)] focus:border-[#d9083c] outline-none text-[var(--text-color)] tabular-nums"
                 />
                 <button
                   onClick={() => handleWeightChange((set.weightKg || 0) + 2.5)}
-                  className="w-5 h-6 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-xs font-bold text-[var(--text-muted)] hover:text-white"
+                  className="w-5 h-6 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-xs font-bold text-[var(--text-color)] hover:bg-[var(--border-color)] transition-colors"
                   title="+2.5 kg"
                 >
                   +
@@ -169,7 +169,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => handleRepsChange((set.reps || 0) - 1)}
-                className="w-5 h-6 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-xs font-bold text-[var(--text-muted)] hover:text-white"
+                className="w-5 h-6 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-xs font-bold text-[var(--text-color)] hover:bg-[var(--border-color)] transition-colors"
                 title="-1 rep"
               >
                 -
@@ -180,11 +180,11 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
                 placeholder="reps"
                 value={set.reps ?? ''}
                 onChange={(e) => handleRepsChange(parseInt(e.target.value, 10) || 0)}
-                className="w-12 p-1 text-center font-mono text-sm bg-transparent border-b border-[#2a2a2a] focus:border-[#d9083c] outline-none text-white tabular-nums"
+                className="w-12 p-1 text-center font-mono text-sm bg-transparent border-b border-[var(--border-color)] focus:border-[#d9083c] outline-none text-[var(--text-color)] tabular-nums"
               />
               <button
                 onClick={() => handleRepsChange((set.reps || 0) + 1)}
-                className="w-5 h-6 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-xs font-bold text-[var(--text-muted)] hover:text-white"
+                className="w-5 h-6 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-xs font-bold text-[var(--text-color)] hover:bg-[var(--border-color)] transition-colors"
                 title="+1 rep"
               >
                 +
@@ -207,7 +207,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
         {previousSet && !set.completed && (
           <button
             onClick={handleCopyPrevious}
-            className="p-1 text-[var(--text-muted)] hover:text-white rounded-sm"
+            className="p-1 text-[var(--text-muted)] hover:text-[var(--text-color)] rounded-sm"
             title="Copy previous performance"
           >
             <Copy className="w-3.5 h-3.5" />
@@ -220,7 +220,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
           className={`w-7 h-7 rounded-sm border flex items-center justify-center transition-all ${
             set.completed
               ? 'bg-[#d9083c] border-[#d9083c] text-white'
-              : 'border-[#3a3a3a] hover:border-[#d9083c] bg-[#161616]'
+              : 'border-[var(--border-color)] hover:border-[#d9083c] bg-[var(--card-bg)] text-[var(--text-color)]'
           }`}
           title={set.completed ? 'Mark incomplete' : 'Complete set'}
         >
@@ -231,12 +231,12 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
       {/* Set Options Dropdown / Modal */}
       {showMenu && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#161616] border border-[#2a2a2a] w-full max-w-xs p-4 rounded-md space-y-3 text-[#f0f0f0]">
-            <div className="flex items-center justify-between pb-2 border-b border-[#2a2a2a]">
+          <div className="bg-[var(--card-bg)] border border-[var(--border-color)] w-full max-w-xs p-4 rounded-md space-y-3 text-[var(--text-color)]">
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
               <span className="font-bold text-sm">Set {set.order} Options</span>
               <button
                 onClick={() => setShowMenu(false)}
-                className="text-[var(--text-muted)] hover:text-white text-xs uppercase"
+                className="text-[var(--text-muted)] hover:text-[var(--text-color)] text-xs uppercase"
               >
                 Close
               </button>
@@ -258,7 +258,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
                     className={`py-1.5 text-xs font-semibold capitalize rounded-sm border transition-colors ${
                       set.type === t
                         ? 'bg-[#d9083c] border-[#d9083c] text-white'
-                        : 'border-[#2a2a2a] bg-[#1e1e1e] text-[var(--text-muted)] hover:text-white'
+                        : 'border-[var(--border-color)] bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)]'
                     }`}
                   >
                     {t}
@@ -301,7 +301,7 @@ export function SetRow({ set, exercise, previousSet, onPRDetected }: Props) {
             </div>
 
             {/* Delete Set Action */}
-            <div className="pt-2 border-t border-[#2a2a2a]">
+            <div className="pt-2 border-t border-[var(--border-color)]">
               <button
                 onClick={() => {
                   deleteSet(set.id);

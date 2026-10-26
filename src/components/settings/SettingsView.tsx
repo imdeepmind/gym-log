@@ -98,8 +98,8 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto animate-in fade-in duration-200">
-      <div className="border-b border-[#2a2a2a] pb-2">
-        <h2 className="text-xl font-bold text-white tracking-tight">App Settings</h2>
+      <div className="border-b border-[var(--border-color)] pb-2">
+        <h2 className="text-xl font-bold text-[var(--text-color)] tracking-tight">App Settings</h2>
         <p className="text-xs text-[var(--text-muted)]">
           Manage workout preferences, offline storage, and JSON backups
         </p>
@@ -113,15 +113,15 @@ export function SettingsView() {
 
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-white">Default Weight Unit</div>
+            <div className="text-sm font-semibold text-[var(--text-color)]">Default Weight Unit</div>
             <div className="text-xs text-[var(--text-muted)]">All values stored in canonical kg</div>
           </div>
-          <div className="flex items-center space-x-1 bg-[#1e1e1e] p-1 rounded-sm border border-[#2a2a2a]">
+          <div className="flex items-center space-x-1 bg-[var(--hover-bg)] p-1 rounded-sm border border-[var(--border-color)]">
             {(['kg', 'lb'] as const).map((u) => (
               <button
                 key={u}
                 onClick={() => handleUpdateSetting('unit', u)}
-                className={`px-3 py-1 text-xs font-bold uppercase rounded-sm transition-colors ${unit === u ? 'bg-[#d9083c] text-white' : 'text-[var(--text-muted)] hover:text-white'
+                className={`px-3 py-1 text-xs font-bold uppercase rounded-sm transition-colors ${unit === u ? 'bg-[#d9083c] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
                   }`}
               >
                 {u}
@@ -130,15 +130,15 @@ export function SettingsView() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[#2a2a2a]">
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
           <div>
-            <div className="text-sm font-semibold text-white">Plate Rounding Increment</div>
+            <div className="text-sm font-semibold text-[var(--text-color)]">Plate Rounding Increment</div>
             <div className="text-xs text-[var(--text-muted)]">Stepper and suggestion increment</div>
           </div>
           <select
             value={rounding}
             onChange={(e) => handleUpdateSetting('roundingIncrement', parseFloat(e.target.value))}
-            className="flat-input text-xs py-1.5 px-3 bg-[#161616]"
+            className="flat-input text-xs py-1.5 px-3 bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
           >
             <option value="1">1.0 kg / lb</option>
             <option value="1.25">1.25 kg</option>
@@ -147,15 +147,15 @@ export function SettingsView() {
           </select>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[#2a2a2a]">
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
           <div>
-            <div className="text-sm font-semibold text-white">Default Rest Duration</div>
+            <div className="text-sm font-semibold text-[var(--text-color)]">Default Rest Duration</div>
             <div className="text-xs text-[var(--text-muted)]">Initial countdown when rest starts</div>
           </div>
           <select
             value={defaultRest}
             onChange={(e) => handleUpdateSetting('defaultRestSec', parseInt(e.target.value, 10))}
-            className="flat-input text-xs py-1.5 px-3 bg-[#161616]"
+            className="flat-input text-xs py-1.5 px-3 bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
           >
             <option value="60">60 seconds (1 min)</option>
             <option value="90">90 seconds (1.5 min)</option>
@@ -173,13 +173,13 @@ export function SettingsView() {
 
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-white">Estimated 1RM Formula</div>
+            <div className="text-sm font-semibold text-[var(--text-color)]">Estimated 1RM Formula</div>
             <div className="text-xs text-[var(--text-muted)]">Used for strength progression charts</div>
           </div>
           <select
             value={e1rmFormula}
             onChange={(e) => handleUpdateSetting('e1rmFormula', e.target.value)}
-            className="flat-input text-xs py-1.5 px-3 bg-[#161616]"
+            className="flat-input text-xs py-1.5 px-3 bg-[var(--card-bg)] text-[var(--text-color)] border-[var(--border-color)]"
           >
             <option value="epley">Epley Formula (w × (1 + r/30))</option>
             <option value="brzycki">Brzycki Formula (w × (36 / (37 - r)))</option>
@@ -255,21 +255,21 @@ export function SettingsView() {
 
         {/* Import Preview Modal / Box */}
         {importPreview && (
-          <div className="p-4 bg-[#121212] border border-[#2a2a2a] rounded-sm space-y-3 mt-4">
+          <div className="p-4 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm space-y-3 mt-4">
             {importPreview.valid ? (
               <>
-                <div className="text-xs font-semibold text-white flex items-center space-x-1.5">
+                <div className="text-xs font-semibold text-[var(--text-color)] flex items-center space-x-1.5">
                   <Check className="w-4 h-4 text-emerald-400" />
                   <span>Valid Backup File Detected</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs font-mono text-[var(--text-muted)]">
-                  <div>Workouts: <strong className="text-white">{importPreview.counts.workouts}</strong></div>
-                  <div>Sets: <strong className="text-white">{importPreview.counts.sets}</strong></div>
-                  <div>Exercises: <strong className="text-white">{importPreview.counts.exercises}</strong></div>
+                  <div>Workouts: <strong className="text-[var(--text-color)]">{importPreview.counts.workouts}</strong></div>
+                  <div>Sets: <strong className="text-[var(--text-color)]">{importPreview.counts.sets}</strong></div>
+                  <div>Exercises: <strong className="text-[var(--text-color)]">{importPreview.counts.exercises}</strong></div>
                 </div>
 
                 <div className="flex items-center space-x-3 pt-2">
-                  <label className="flex items-center space-x-1.5 text-xs text-white">
+                  <label className="flex items-center space-x-1.5 text-xs text-[var(--text-color)]">
                     <input
                       type="radio"
                       name="strategy"
@@ -278,7 +278,7 @@ export function SettingsView() {
                     />
                     <span>Merge (keep newest records)</span>
                   </label>
-                  <label className="flex items-center space-x-1.5 text-xs text-white">
+                  <label className="flex items-center space-x-1.5 text-xs text-[var(--text-color)]">
                     <input
                       type="radio"
                       name="strategy"

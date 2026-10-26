@@ -82,7 +82,7 @@ export function BodyTrackingView() {
             className={`px-3 py-1.5 rounded-sm text-xs font-semibold uppercase tracking-wider transition-colors ${
               selectedType === m.id
                 ? 'bg-[#d9083c] text-white shadow-sm'
-                : 'bg-[#181818] border border-[#2a2a2a] text-[var(--text-muted)] hover:text-white hover:border-[#3a3a3a]'
+                : 'bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--text-muted)]'
             }`}
           >
             {m.label} <span className="opacity-60 text-[10px]">({m.unit})</span>
@@ -142,7 +142,7 @@ export function BodyTrackingView() {
             Current {activeMetricConfig.label}
           </div>
           <div className="my-2">
-            <div className="text-2xl font-bold font-mono text-white">
+            <div className="text-2xl font-bold font-mono text-[var(--text-color)]">
               {latestValue ?? '--'}{' '}
               <span className="text-xs font-normal text-[var(--text-muted)]">
                 {activeMetricConfig.unit}
@@ -172,16 +172,16 @@ export function BodyTrackingView() {
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke="#222222" strokeDasharray="3 3" />
-                <XAxis dataKey="date" stroke="#666666" tick={{ fontSize: 10 }} />
-                <YAxis domain={['auto', 'auto']} stroke="#666666" tick={{ fontSize: 10 }} />
+                <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" />
+                <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 10 }} />
+                <YAxis domain={['auto', 'auto']} stroke="var(--text-muted)" tick={{ fontSize: 10 }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#161616',
-                    borderColor: '#2a2a2a',
+                    backgroundColor: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)',
                     borderRadius: '4px',
                     fontSize: '12px',
-                    color: '#f0f0f0',
+                    color: 'var(--text-color)',
                   }}
                 />
                 <Line
@@ -201,21 +201,21 @@ export function BodyTrackingView() {
       {/* History Log Table */}
       {(metrics?.length ?? 0) > 0 && (
         <div className="flat-card overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-[#2a2a2a] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="px-4 py-2.5 border-b border-[var(--border-color)] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Recorded History ({metrics!.length})
           </div>
-          <div className="divide-y divide-[#2a2a2a] max-h-60 overflow-y-auto">
+          <div className="divide-y divide-[var(--border-color)] max-h-60 overflow-y-auto">
             {metrics!
               .slice()
               .reverse()
               .map((m) => (
-                <div key={m.id} className="p-3 flex items-center justify-between text-xs hover:bg-[#1a1a1a] transition-colors">
+                <div key={m.id} className="p-3 flex items-center justify-between text-xs hover:bg-[var(--hover-bg)] transition-colors">
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-4 h-4 text-[var(--text-muted)]" />
-                    <span className="font-mono text-slate-300">{m.date}</span>
+                    <span className="font-mono text-[var(--text-muted)]">{m.date}</span>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className="font-mono font-bold text-white text-sm">
+                    <span className="font-mono font-bold text-[var(--text-color)] text-sm">
                       {m.value} {activeMetricConfig.unit}
                     </span>
                     <button

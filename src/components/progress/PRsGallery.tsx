@@ -21,7 +21,7 @@ export function PRsGallery() {
     return (
       <div className="flat-card p-10 text-center space-y-3">
         <Trophy className="w-8 h-8 text-[var(--text-muted)] mx-auto opacity-50" />
-        <h3 className="font-bold text-white text-base">No Personal Records Yet</h3>
+        <h3 className="font-bold text-[var(--text-color)] text-base">No Personal Records Yet</h3>
         <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
           Complete workouts and log working sets. As you increase weight or reps, your all-time PR records will be spotlighted here.
         </p>
@@ -31,9 +31,9 @@ export function PRsGallery() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between pb-1 border-b border-[#2a2a2a]">
+      <div className="flex items-center justify-between pb-1 border-b border-[var(--border-color)]">
         <div>
-          <h3 className="text-base font-bold text-white">All-Time Personal Records</h3>
+          <h3 className="text-base font-bold text-[var(--text-color)]">All-Time Personal Records</h3>
           <p className="text-xs text-[var(--text-muted)]">
             {prs.length} exercises with verified record bests
           </p>
@@ -45,7 +45,7 @@ export function PRsGallery() {
           <div key={item.exercise.id} className="flat-card p-4 space-y-3 hover:border-[#d9083c] transition-colors">
             <div className="flex items-start justify-between">
               <div>
-                <h4 className="font-bold text-sm text-white">{item.exercise.name}</h4>
+                <h4 className="font-bold text-sm text-[var(--text-color)]">{item.exercise.name}</h4>
                 <span className="text-[10px] uppercase font-semibold text-[#d9083c]">
                   {getMuscleName(item.exercise.primaryMuscle)}
                 </span>
@@ -53,17 +53,17 @@ export function PRsGallery() {
               <Trophy className="w-4 h-4 text-amber-400" />
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#2a2a2a] text-center font-mono">
-              <div className="bg-[#121212] p-2 rounded-sm border border-[#2a2a2a]">
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[var(--border-color)] text-center font-mono">
+              <div className="bg-[var(--hover-bg)] p-2 rounded-sm border border-[var(--border-color)]">
                 <div className="text-[9px] uppercase font-semibold text-[var(--text-muted)] font-sans">
                   Max Wt
                 </div>
-                <div className="font-bold text-white text-sm mt-0.5">
+                <div className="font-bold text-[var(--text-color)] text-sm mt-0.5">
                   {item.maxWeight} <span className="text-[10px] text-[var(--text-muted)]">kg</span>
                 </div>
               </div>
 
-              <div className="bg-[#121212] p-2 rounded-sm border border-[#2a2a2a]">
+              <div className="bg-[var(--hover-bg)] p-2 rounded-sm border border-[var(--border-color)]">
                 <div className="text-[9px] uppercase font-semibold text-[var(--text-muted)] font-sans">
                   Best e1RM
                 </div>
@@ -72,11 +72,11 @@ export function PRsGallery() {
                 </div>
               </div>
 
-              <div className="bg-[#121212] p-2 rounded-sm border border-[#2a2a2a]">
+              <div className="bg-[var(--hover-bg)] p-2 rounded-sm border border-[var(--border-color)]">
                 <div className="text-[9px] uppercase font-semibold text-[var(--text-muted)] font-sans">
                   Best Reps
                 </div>
-                <div className="font-bold text-white text-sm mt-0.5">
+                <div className="font-bold text-[var(--text-color)] text-sm mt-0.5">
                   {item.bestReps} <span className="text-[10px] text-[var(--text-muted)]">reps</span>
                 </div>
               </div>

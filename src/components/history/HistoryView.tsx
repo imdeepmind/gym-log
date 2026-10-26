@@ -125,9 +125,9 @@ export function HistoryView() {
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-[#2a2a2a]">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-[var(--border-color)]">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Workout History</h2>
+          <h2 className="text-xl font-bold text-[var(--text-color)] tracking-tight">Workout History</h2>
           <p className="text-xs text-[var(--text-muted)]">
             {workouts.length} total sessions recorded with zero data loss
           </p>
@@ -148,7 +148,7 @@ export function HistoryView() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-2.5 text-[var(--text-muted)] hover:text-white"
+              className="absolute right-3 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-color)]"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -162,7 +162,7 @@ export function HistoryView() {
             <select
               value={filterMuscle}
               onChange={(e) => setFilterMuscle(e.target.value)}
-              className="flat-input py-1 px-2 text-xs bg-[#161616]"
+              className="flat-input py-1 px-2 text-xs bg-[var(--card-bg)] text-[var(--text-color)]"
             >
               <option value="all">All Muscle Groups</option>
               {ALL_MUSCLES.map((m) => (
@@ -178,7 +178,7 @@ export function HistoryView() {
             <select
               value={filterExerciseId}
               onChange={(e) => setFilterExerciseId(e.target.value)}
-              className="flat-input py-1 px-2 text-xs bg-[#161616] max-w-[200px]"
+              className="flat-input py-1 px-2 text-xs bg-[var(--card-bg)] text-[var(--text-color)] max-w-[200px]"
             >
               <option value="all">All Movements</option>
               {allExercises.map((e) => (
@@ -207,10 +207,10 @@ export function HistoryView() {
       {/* Workouts List */}
       {filteredWorkouts.length === 0 ? (
         <div className="flat-card p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-sm bg-[#1e1e1e] border border-[#2a2a2a] flex items-center justify-center mx-auto text-[var(--text-muted)]">
+          <div className="w-12 h-12 rounded-sm bg-[var(--hover-bg)] border border-[var(--border-color)] flex items-center justify-center mx-auto text-[var(--text-muted)]">
             <Calendar className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white">No Workouts Found</h3>
+          <h3 className="text-base font-bold text-[var(--text-color)]">No Workouts Found</h3>
           <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
             {workouts.length === 0
               ? 'Start your first workout from the Workout tab. Once finished, your sessions will be archived here.'
@@ -244,7 +244,7 @@ export function HistoryView() {
                 <div className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-bold text-base text-white tracking-tight hover:text-[#d9083c] transition-colors">
+                      <h3 className="font-bold text-base text-[var(--text-color)] tracking-tight hover:text-[#d9083c] transition-colors">
                         {workout.name}
                       </h3>
                     </div>
@@ -260,7 +260,7 @@ export function HistoryView() {
                       {workout.mood && (
                         <>
                           <span>·</span>
-                          <span className="text-amber-400">Mood {workout.mood}/5</span>
+                          <span className="text-amber-500 font-semibold">Mood {workout.mood}/5</span>
                         </>
                       )}
                     </div>
@@ -272,13 +272,13 @@ export function HistoryView() {
                       <div className="flex items-center space-x-2 font-mono">
                         <div className="text-right">
                           <div className="text-[10px] text-[var(--text-muted)] uppercase">Volume</div>
-                          <div className="font-bold text-white">
+                          <div className="font-bold text-[var(--text-color)]">
                             {summary.totalVolumeKg.toLocaleString()} kg
                           </div>
                         </div>
-                        <div className="text-right pl-2 border-l border-[#2a2a2a]">
+                        <div className="text-right pl-2 border-l border-[var(--border-color)]">
                           <div className="text-[10px] text-[var(--text-muted)] uppercase">Sets</div>
-                          <div className="font-bold text-white">{summary.workingSets}</div>
+                          <div className="font-bold text-[var(--text-color)]">{summary.workingSets}</div>
                         </div>
                       </div>
                     )}
@@ -299,9 +299,9 @@ export function HistoryView() {
 
                 {/* Expanded Session Detail View */}
                 {isExpanded && (
-                  <div className="px-5 pb-5 pt-2 border-t border-[#2a2a2a] bg-[#121212]/60 space-y-4">
+                  <div className="px-5 pb-5 pt-2 border-t border-[var(--border-color)] bg-[var(--hover-bg)]/40 space-y-4">
                     {workout.notes && (
-                      <div className="p-3 bg-[#161616] border border-[#2a2a2a] rounded-sm text-xs text-slate-300">
+                      <div className="p-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-sm text-xs text-[var(--text-color)]">
                         <span className="font-semibold text-[var(--text-muted)] uppercase text-[10px] block mb-1">
                           Session Notes
                         </span>
@@ -315,7 +315,7 @@ export function HistoryView() {
                         {Object.entries(summary.muscleSets).map(([m, count]) => (
                           <span
                             key={m}
-                            className="px-2 py-0.5 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-[11px] text-slate-300"
+                            className="px-2 py-0.5 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-[11px] text-[var(--text-color)]"
                           >
                             {getMuscleName(m as any)}: <strong className="text-[#d9083c]">{count}</strong>
                           </span>
@@ -328,18 +328,18 @@ export function HistoryView() {
                       {Array.from(setsByExercise.entries()).map(([exId, setsList]) => {
                         const exercise = exerciseMap.get(exId);
                         return (
-                          <div key={exId} className="bg-[#161616] border border-[#2a2a2a] rounded-sm p-3">
-                            <h4 className="font-semibold text-xs text-white mb-2">
+                          <div key={exId} className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-sm p-3">
+                            <h4 className="font-semibold text-xs text-[var(--text-color)] mb-2">
                               {exercise?.name || 'Movement'}
                             </h4>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
                               {setsList.map((s, idx) => (
                                 <div
                                   key={s.id}
-                                  className="p-1.5 bg-[#121212] border border-[#2a2a2a] rounded-sm flex items-center justify-between"
+                                  className="p-1.5 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm flex items-center justify-between"
                                 >
                                   <span className="text-[var(--text-muted)] font-sans">Set {idx + 1}</span>
-                                  <span className="font-bold text-white">
+                                  <span className="font-bold text-[var(--text-color)]">
                                     {s.durationSec
                                       ? `${s.durationSec}s`
                                       : `${s.weightKg ?? 0}k × ${s.reps ?? 0}`}

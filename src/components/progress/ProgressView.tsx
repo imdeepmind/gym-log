@@ -73,9 +73,9 @@ export function ProgressView() {
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Top Header & Subtabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#2a2a2a]">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[var(--border-color)]">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Progress & Analytics</h2>
+          <h2 className="text-xl font-bold text-[var(--text-color)] tracking-tight">Progress & Analytics</h2>
           <p className="text-xs text-[var(--text-muted)]">
             Progression charts, personal records, and body measurements
           </p>
@@ -83,7 +83,7 @@ export function ProgressView() {
 
         {/* Time Range Selector */}
         {(activeSubtab === 'exercise' || activeSubtab === 'overall') && (
-          <div className="flex items-center space-x-1 bg-[#1e1e1e] p-1 rounded-sm border border-[#2a2a2a]">
+          <div className="flex items-center space-x-1 bg-[var(--hover-bg)] p-1 rounded-sm border border-[var(--border-color)]">
             {TIME_RANGES.map((r) => (
               <button
                 key={r}
@@ -91,7 +91,7 @@ export function ProgressView() {
                 className={`px-2.5 py-1 text-[11px] font-bold rounded-sm transition-colors ${
                   timeRange === r
                     ? 'bg-[#d9083c] text-white'
-                    : 'text-[var(--text-muted)] hover:text-white'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
                 }`}
               >
                 {r}
@@ -119,7 +119,7 @@ export function ProgressView() {
               className={`flex items-center space-x-1.5 px-3 py-2 rounded-sm text-xs font-semibold uppercase tracking-wider transition-all ${
                 isActive
                   ? 'bg-[#d9083c] text-white shadow-sm'
-                  : 'bg-[#181818] border border-[#2a2a2a] text-[var(--text-muted)] hover:text-white hover:border-[#3a3a3a]'
+                  : 'bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--text-muted)]'
               }`}
             >
               <Icon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -141,7 +141,7 @@ export function ProgressView() {
               <select
                 value={selectedExerciseId}
                 onChange={(e) => setSelectedExerciseId(e.target.value)}
-                className="flat-input w-full p-2 text-sm bg-[#161616] font-semibold text-white"
+                className="flat-input w-full p-2 text-sm bg-[var(--card-bg)] font-semibold text-[var(--text-color)]"
               >
                 {allExercises.map((ex) => (
                   <option key={ex.id} value={ex.id}>
@@ -157,11 +157,11 @@ export function ProgressView() {
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                   All-Time Max
                 </div>
-                <div className="font-bold text-white text-lg">
+                <div className="font-bold text-[var(--text-color)] text-lg">
                   {exerciseData.allTimeMaxWeight} <span className="text-xs text-[var(--text-muted)] font-normal">kg</span>
                 </div>
               </div>
-              <div className="text-right pl-3 border-l border-[#2a2a2a]">
+              <div className="text-right pl-3 border-l border-[var(--border-color)]">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                   Estimated 1RM
                 </div>
@@ -175,7 +175,7 @@ export function ProgressView() {
           {exerciseData.points.length === 0 ? (
             <div className="flat-card p-10 text-center space-y-2">
               <Activity className="w-8 h-8 text-[var(--text-muted)] mx-auto opacity-40" />
-              <h4 className="font-bold text-white text-sm">No History for this Movement</h4>
+              <h4 className="font-bold text-[var(--text-color)] text-sm">No History for this Movement</h4>
               <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
                 Complete at least one workout containing {selectedExercise?.name || 'this exercise'} to generate progressive overload charts.
               </p>
@@ -191,16 +191,16 @@ export function ProgressView() {
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={exerciseData.points} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid stroke="#222222" strokeDasharray="3 3" />
-                      <XAxis dataKey="date" stroke="#666666" tick={{ fontSize: 10 }} />
-                      <YAxis stroke="#666666" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
+                      <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" />
+                      <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 10 }} />
+                      <YAxis stroke="var(--text-muted)" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#161616',
-                          borderColor: '#2a2a2a',
+                          backgroundColor: 'var(--card-bg)',
+                          borderColor: 'var(--border-color)',
                           borderRadius: '4px',
                           fontSize: '12px',
-                          color: '#f0f0f0',
+                          color: 'var(--text-color)',
                         }}
                       />
                       <Line
@@ -226,16 +226,16 @@ export function ProgressView() {
                 <div className="h-60 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={exerciseData.points} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid stroke="#222222" strokeDasharray="3 3" />
-                      <XAxis dataKey="date" stroke="#666666" tick={{ fontSize: 10 }} />
-                      <YAxis stroke="#666666" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
+                      <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" />
+                      <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 10 }} />
+                      <YAxis stroke="var(--text-muted)" tick={{ fontSize: 10 }} domain={['auto', 'auto']} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#161616',
-                          borderColor: '#2a2a2a',
+                          backgroundColor: 'var(--card-bg)',
+                          borderColor: 'var(--border-color)',
                           borderRadius: '4px',
                           fontSize: '12px',
-                          color: '#f0f0f0',
+                          color: 'var(--text-color)',
                         }}
                       />
                       <Bar dataKey="volume" name="Session Volume (kg)" fill="#d9083c" radius={[2, 2, 0, 0]} />
@@ -247,18 +247,18 @@ export function ProgressView() {
               {/* Rep PRs at Specific Weights Table */}
               {exerciseData.repPRs.length > 0 && (
                 <div className="flat-card overflow-hidden">
-                  <div className="px-4 py-2.5 border-b border-[#2a2a2a] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  <div className="px-4 py-2.5 border-b border-[var(--border-color)] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                     Rep PRs by Weight ({exerciseData.repPRs.length} load tiers)
                   </div>
-                  <div className="divide-y divide-[#2a2a2a]">
-                    <div className="px-4 py-1.5 bg-[#121212] grid grid-cols-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  <div className="divide-y divide-[var(--border-color)]">
+                    <div className="px-4 py-1.5 bg-[var(--hover-bg)] grid grid-cols-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                       <span>Weight</span>
                       <span className="text-center">Best Reps</span>
                       <span className="text-right">Achieved Date</span>
                     </div>
                     {exerciseData.repPRs.map((pr) => (
-                      <div key={pr.weightKg} className="px-4 py-2.5 grid grid-cols-3 text-xs font-mono hover:bg-[#1a1a1a]">
-                        <span className="font-bold text-white">{pr.weightKg} kg</span>
+                      <div key={pr.weightKg} className="px-4 py-2.5 grid grid-cols-3 text-xs font-mono hover:bg-[var(--hover-bg)]">
+                        <span className="font-bold text-[var(--text-color)]">{pr.weightKg} kg</span>
                         <span className="text-center font-bold text-[#d9083c]">{pr.reps} reps</span>
                         <span className="text-right text-[var(--text-muted)]">{pr.date}</span>
                       </div>
@@ -293,16 +293,16 @@ export function ProgressView() {
                         <stop offset="95%" stopColor="#d9083c" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid stroke="#222222" strokeDasharray="3 3" />
-                    <XAxis dataKey="date" stroke="#666666" tick={{ fontSize: 10 }} />
-                    <YAxis stroke="#666666" tick={{ fontSize: 10 }} />
+                    <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" />
+                    <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 10 }} />
+                    <YAxis stroke="var(--text-muted)" tick={{ fontSize: 10 }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#161616',
-                        borderColor: '#2a2a2a',
+                        backgroundColor: 'var(--card-bg)',
+                        borderColor: 'var(--border-color)',
                         borderRadius: '4px',
                         fontSize: '12px',
-                        color: '#f0f0f0',
+                        color: 'var(--text-color)',
                       }}
                     />
                     <Area

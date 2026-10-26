@@ -47,9 +47,9 @@ export function ExercisesView() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#2a2a2a]">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[var(--border-color)]">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Movement Library</h2>
+          <h2 className="text-xl font-bold text-[var(--text-color)] tracking-tight">Movement Library</h2>
           <p className="text-xs text-[var(--text-muted)]">
             {exercises.length} total movements preloaded with muscles, equipment, and tracking types
           </p>
@@ -86,7 +86,7 @@ export function ExercisesView() {
               className={`px-3 py-1 rounded-sm text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap transition-colors ${
                 activeTab === tab
                   ? 'bg-[#d9083c] text-white'
-                  : 'bg-[#1e1e1e] text-[var(--text-muted)] hover:text-white'
+                  : 'bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] border border-[var(--border-color)]'
               }`}
             >
               {tab}
@@ -104,7 +104,7 @@ export function ExercisesView() {
           >
             <div>
               <div className="flex items-start justify-between gap-2">
-                <h4 className="font-bold text-sm text-white hover:text-[#d9083c] transition-colors">
+                <h4 className="font-bold text-sm text-[var(--text-color)] hover:text-[#d9083c] transition-colors">
                   {ex.name}
                 </h4>
                 <button
@@ -116,19 +116,19 @@ export function ExercisesView() {
               </div>
 
               <div className="flex flex-wrap gap-1 mt-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-[#d9083c]">
+                <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-[#d9083c]">
                   {getMuscleName(ex.primaryMuscle)}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 bg-[#1e1e1e] border border-[#2a2a2a] rounded-sm text-slate-300">
+                <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-[var(--text-color)]">
                   {ex.equipment}
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#121212] rounded-sm text-[var(--text-muted)]">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-sm text-[var(--text-muted)]">
                   {ex.trackingType.replace('_', ' ')}
                 </span>
               </div>
             </div>
 
-            <div className="text-[11px] text-[var(--text-muted)] font-mono mt-3 pt-2 border-t border-[#2a2a2a]/60 flex items-center justify-between">
+            <div className="text-[11px] text-[var(--text-muted)] font-mono mt-3 pt-2 border-t border-[var(--border-color)] flex items-center justify-between">
               <span>Rest: {ex.defaultRestSec || 90}s</span>
               {ex.isCustom ? (
                 <span className="text-[#d9083c] font-semibold text-[10px] uppercase">Custom</span>

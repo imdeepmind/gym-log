@@ -13,8 +13,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <!-- Script to prevent theme flashing -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('gym_theme');
+          if (saved === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else {
+            document.documentElement.classList.add('dark');
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-[#121212] text-[#f0f0f0] antialiased selection:bg-primary/20 selection:text-primary-light min-h-screen overflow-x-hidden">
+  <body class="antialiased selection:bg-primary/20 selection:text-primary-light min-h-screen overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
