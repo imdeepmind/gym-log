@@ -1,40 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { Exercise } from '@/types';
 import { startWorkout, getActiveWorkout } from '@/services/workout';
-import { startWorkoutFromPlan } from '@/services/plan';
-import { getActiveProgram } from '@/services/program';
-import { getScheduledPlansForDate } from '@/domain/schedule';
-import { ActiveWorkoutView } from '@/components/workout/ActiveWorkoutView';
-import { PlansView } from '@/components/plans/PlansView';
-import { HistoryView } from '@/components/history/HistoryView';
-import { ExercisesView } from '@/components/exercises/ExercisesView';
-import { SettingsView } from '@/components/settings/SettingsView';
+import {
+  WorkoutPage,
+  PlansPage,
+  ProgressPage,
+  ExercisesPage,
+  HistoryPage,
+  SettingsPage,
+} from '@/pages';
 import { RestTimerBar } from '@/components/workout/RestTimerBar';
 import { Header, TabType } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
-
-const ProgressView = React.lazy(() =>
-  import('@/components/progress/ProgressView').then((m) => ({ default: m.ProgressView }))
-);
-import { 
-  Dumbbell, 
-  Flame, 
-  Trophy, 
-  Calendar, 
-  Settings as SettingsIcon, 
-  Plus, 
-  Play, 
+import {
+  Dumbbell,
   Layers,
-  ArrowRight,
-  Repeat,
-  CheckCircle2
+  Trophy,
+  Flame,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('workout');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Initialize DB seed exercises, default plans, and settings on mount
@@ -45,41 +36,16 @@ export default function App() {
   // Reactive Dexie query for active in_progress workout
   const activeWorkout = useLiveQuery(() => getActiveWorkout(), [], undefined);
 
-  // Reactive Dexie query for active program
-  const activeProgram = useLiveQuery(() => getActiveProgram(), [], undefined);
-  const overrides = useLiveQuery(() => db.scheduleOverrides.toArray(), [], []);
-
-  // Plans & exercises queries
-  const plans = useLiveQuery(() => db.plans.toArray(), [], []);
-  const allExercises = useLiveQuery(() => db.exercises.toArray(), [], []);
-  const exerciseMap = useMemo(() => {
-    const map = new Map<string, Exercise>();
-    allExercises.forEach((e) => map.set(e.id, e));
-    return map;
-  }, [allExercises]);
-
-  const planMap = useMemo(() => new Map(plans.map((p) => [p.id, p])), [plans]);
-
-  // Recent completed workouts (last 3)
-  const recentWorkouts = useLiveQuery(
-    () => db.workouts.where('status').equals('completed').reverse().limit(3).toArray(),
-    [],
-    []
-  );
-
-  // Resolve today's scheduled plan
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todayScheduledPlanIds = getScheduledPlansForDate(todayStr, activeProgram, overrides);
-  const todayPlanId = todayScheduledPlanIds.length > 0 ? todayScheduledPlanIds[0] : undefined;
-  const todayPlan = todayPlanId ? planMap.get(todayPlanId) : undefined;
-
-  // Check if any workout was completed today
-  const todaysCompletedWorkouts = useLiveQuery(
-    () => db.workouts.where('localDate').equals(todayStr).filter((w) => w.status === 'completed').toArray(),
-    [todayStr],
-    []
-  );
-  const completedTodayWorkout = todaysCompletedWorkouts.length > 0 ? todaysCompletedWorkouts[0] : undefined;
+  // Derive active tab from current URL pathname
+  const activeTab = useMemo<TabType>(() => {
+    const p = location.pathname;
+    if (p.startsWith('/plans') || p.startsWith('/calendar')) return 'plans';
+    if (p.startsWith('/progress')) return 'progress';
+    if (p.startsWith('/exercises')) return 'exercises';
+    if (p.startsWith('/history')) return 'history';
+    if (p.startsWith('/settings')) return 'settings';
+    return 'workout';
+  }, [location.pathname]);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -90,26 +56,33 @@ export default function App() {
     }
   };
 
-  const handleStartEmpty = async () => {
-    await startWorkout('Strength Session');
-    setActiveTab('workout');
+  const handleSelectTab = (tab: TabType) => {
+    if (tab === 'workout') {
+      navigate('/');
+    } else {
+      navigate(`/${tab}`);
+    }
   };
 
-  const handleStartTodayPlan = async () => {
-    if (todayPlan) {
-      await startWorkoutFromPlan(todayPlan.id);
-    } else {
-      await startWorkout('Strength Session');
-    }
-    setActiveTab('workout');
+  const handleStartEmpty = async () => {
+    await startWorkout('Strength Session');
+    navigate('/');
   };
+
+  const navItems = [
+    { id: 'workout' as const, label: 'Workout', icon: Dumbbell, path: '/' },
+    { id: 'plans' as const, label: 'Plans', icon: Layers, path: '/plans' },
+    { id: 'progress' as const, label: 'Progress', icon: Trophy, path: '/progress' },
+    { id: 'history' as const, label: 'History', icon: Flame, path: '/history' },
+    { id: 'settings' as const, label: 'Settings', icon: SettingsIcon, path: '/settings' },
+  ];
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-[#121212] text-[#f0f0f0]' : 'bg-[#ffffff] text-[#1a1a1a]'} flex flex-col font-sans transition-colors duration-200`}>
       {/* Top Header - Across all viewports */}
       <Header
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         isDarkMode={isDarkMode}
         onToggleTheme={toggleTheme}
         hasActiveWorkout={!!activeWorkout}
@@ -119,369 +92,31 @@ export default function App() {
       {/* Left Sidenav Panel (Desktop, below top header) */}
       <Sidebar
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         hasActiveWorkout={!!activeWorkout}
       />
 
       {/* Main Content Area - Responsive Container for Desktop & Mobile */}
       <div className="flex-1 flex flex-col md:ml-16">
         <main className="flex-1 max-w-5xl w-full mx-auto p-4 lg:p-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-8">
-        {/* TAB 1: WORKOUT */}
-        {activeTab === 'workout' && (
-          activeWorkout ? (
-            /* Active Workout in Progress */
-            <ActiveWorkoutView
-              workout={activeWorkout}
-              onFinishComplete={() => setActiveTab('history')}
-              onDiscardComplete={() => {}}
-            />
-          ) : (
-            /* Clean, Actionable Workout Dashboard */
-            <div className="space-y-6 animate-in fade-in duration-200">
-              {/* Today's Scheduled Plan or Completed Session Card */}
-              <div
-                className={`flat-card p-6 transition-colors ${
-                  completedTodayWorkout
-                    ? 'border-emerald-500/50 bg-emerald-950/10 shadow-lg'
-                    : ''
-                }`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    {completedTodayWorkout ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
-                        <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                          Completed Today
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="w-2 h-2 bg-[#d9083c] rounded-full animate-pulse" />
-                        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                          Today's Scheduled Routine
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <span className="text-xs font-mono text-[var(--text-muted)]">
-                    {activeProgram ? activeProgram.name : 'Weekly Program'}
-                  </span>
-                </div>
-
-                {completedTodayWorkout ? (
-                  /* Completed Today View */
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
-                          <span>{completedTodayWorkout.name}</span>
-                        </h2>
-                        <p className="text-xs text-emerald-400/90 mt-1">
-                          Session finished · Great work completing your training today!
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => setActiveTab('history')}
-                          className="btn-primary flex items-center space-x-1.5 text-xs py-2 px-4 bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-md"
-                        >
-                          <Flame className="w-3.5 h-3.5" />
-                          <span>View in History</span>
-                        </button>
-                        <button
-                          onClick={handleStartEmpty}
-                          className="btn-secondary flex items-center space-x-1.5 text-xs py-2 px-3 text-[var(--text-muted)] hover:text-white"
-                          title="Start another workout session today"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Train Again</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Today's Completed Session Stats */}
-                    {completedTodayWorkout.summary && (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3 border-t border-[#2a2a2a]">
-                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
-                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
-                            Duration
-                          </div>
-                          <div className="text-sm font-bold font-mono text-white mt-0.5">
-                            {Math.floor(completedTodayWorkout.summary.durationSec / 60)} mins
-                          </div>
-                        </div>
-                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
-                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
-                            Volume
-                          </div>
-                          <div className="text-sm font-bold font-mono text-white mt-0.5">
-                            {completedTodayWorkout.summary.totalVolumeKg.toLocaleString()} kg
-                          </div>
-                        </div>
-                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
-                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
-                            Working Sets
-                          </div>
-                          <div className="text-sm font-bold font-mono text-white mt-0.5">
-                            {completedTodayWorkout.summary.workingSets} sets
-                          </div>
-                        </div>
-                        <div className="p-2.5 bg-[#141414] rounded-sm border border-[#2a2a2a]">
-                          <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">
-                            Total Reps
-                          </div>
-                          <div className="text-sm font-bold font-mono text-white mt-0.5">
-                            {completedTodayWorkout.summary.totalReps} reps
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  /* Not Yet Completed Today View */
-                  <>
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                      <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-color)]">
-                          {todayPlan ? todayPlan.name : activeProgram ? 'Rest Day' : 'Strength Session'}
-                        </h2>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">
-                          {todayPlan
-                            ? `${todayPlan.exercises.length} exercises scheduled for today's session`
-                            : activeProgram
-                            ? 'No workouts scheduled for today in your active program.'
-                            : 'Start an empty workout or create a plan to begin logging.'}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        {todayPlan && (
-                          <button
-                            onClick={handleStartTodayPlan}
-                            className="btn-primary flex items-center space-x-2 text-xs py-2.5 px-5 shadow-lg"
-                          >
-                            <Play className="w-3.5 h-3.5 fill-white" />
-                            <span>Start Workout</span>
-                          </button>
-                        )}
-                        <button
-                          onClick={handleStartEmpty}
-                          className={`${todayPlan ? 'btn-secondary' : 'btn-primary'} flex items-center space-x-1.5 text-xs py-2.5 px-4`}
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>{todayPlan ? 'Empty Session' : 'Start Workout'}</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Movements list preview in today's plan */}
-                    {todayPlan?.exercises && todayPlan.exercises.length > 0 && (
-                      <div className="pt-4 border-t border-[var(--border-color)]">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2.5">
-                          Scheduled Movements ({todayPlan.exercises.length})
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                          {todayPlan.exercises.map((pe, idx) => {
-                            const ex = exerciseMap.get(pe.exerciseId);
-                            return (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between p-2.5 bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] text-xs"
-                              >
-                                <span className="font-medium text-[var(--text-color)] truncate pr-2">
-                                  {ex?.name || 'Movement'}
-                                </span>
-                                <span className="font-mono text-[11px] text-[var(--text-muted)] whitespace-nowrap">
-                                  {pe.targetSets || 3} sets
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Start from Saved Plans (Quick-Launch Cards) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-bold text-[var(--text-color)] tracking-tight">
-                      Start From a Plan
-                    </h3>
-                    <p className="text-xs text-[var(--text-muted)]">
-                      Launch any saved routine with target sets and prefilled weights
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('plans')}
-                    className="text-xs font-semibold text-[#d9083c] hover:underline flex items-center space-x-1"
-                  >
-                    <span>View All Plans ({plans.length})</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {plans.length === 0 ? (
-                  <div className="flat-card p-6 text-center space-y-2">
-                    <div className="font-semibold text-xs text-[var(--text-color)]">
-                      No Plans Created Yet
-                    </div>
-                    <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
-                      Build your first plan to start tracking custom routines with target sets and prefilled weights.
-                    </p>
-                    <button
-                      onClick={() => setActiveTab('plans')}
-                      className="btn-primary text-xs py-1.5 px-3 inline-flex items-center space-x-1.5 mt-2"
-                    >
-                      <Plus className="w-3 h-3 stroke-[2.5]" />
-                      <span>Create Plan</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {plans.map((p) => (
-                    <div
-                      key={p.id}
-                      className="flat-card p-4 flex flex-col justify-between space-y-3 hover:border-[#d9083c]/60 transition-colors group"
-                    >
-                      <div>
-                        <div className="font-bold text-sm text-[var(--text-color)] group-hover:text-[#d9083c] transition-colors">
-                          {p.name}
-                        </div>
-                        <div className="text-[11px] text-[var(--text-muted)] mt-1">
-                          {p.exercises.length} movements
-                        </div>
-                        <div className="text-[10px] text-[var(--text-muted)] mt-2 line-clamp-2">
-                          {p.exercises
-                            .slice(0, 3)
-                            .map((pe) => exerciseMap.get(pe.exerciseId)?.name || 'Movement')
-                            .join(', ')}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={async () => {
-                          await startWorkoutFromPlan(p.id);
-                          setActiveTab('workout');
-                        }}
-                        className="btn-primary w-full text-xs py-2 flex items-center justify-center space-x-1.5"
-                      >
-                        <Play className="w-3 h-3 fill-white" />
-                        <span>Start Plan</span>
-                      </button>
-                    </div>
-                  ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Recent Activity */}
-              {recentWorkouts.length > 0 && (
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-base font-bold text-[var(--text-color)] tracking-tight">
-                        Recent Activity
-                      </h3>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        Your latest logged sessions
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('history')}
-                      className="text-xs font-semibold text-[var(--text-muted)] hover:text-white flex items-center space-x-1"
-                    >
-                      <span>Full History</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {recentWorkouts.map((w) => (
-                      <div
-                        key={w.id}
-                        className="flat-card p-4 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="font-bold text-xs text-[var(--text-color)]">
-                            {w.name}
-                          </div>
-                          <div className="text-[10px] text-[var(--text-muted)] font-mono mt-0.5">
-                            {w.localDate}
-                            {w.summary?.durationSec
-                              ? ` · ${Math.floor(w.summary.durationSec / 60)} min`
-                              : ''}
-                          </div>
-                          {w.summary?.totalVolumeKg ? (
-                            <div className="text-[11px] font-mono text-[#d9083c] font-semibold mt-1">
-                              {w.summary.totalVolumeKg.toLocaleString()} kg · {w.summary.workingSets} sets
-                            </div>
-                          ) : null}
-                        </div>
-
-                        {w.planId && (
-                          <button
-                            onClick={async () => {
-                              await startWorkoutFromPlan(w.planId!);
-                              setActiveTab('workout');
-                            }}
-                            className="p-2 text-xs text-[var(--text-muted)] hover:text-white hover:bg-[var(--hover-bg)] rounded-sm border border-[var(--border-color)] transition-colors"
-                            title="Repeat this workout"
-                          >
-                            <Repeat className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )
-        )}
-
-        {/* TAB 2: PLANS & CALENDAR */}
-        {(activeTab === 'plans' || (activeTab as string) === 'calendar') && (
-          <PlansView
-            onStartPlanWorkout={(w) => {
-              setActiveTab('workout');
-            }}
-          />
-        )}
-
-        {/* TAB 3: PROGRESS & CHARTS (LAZY LOADED) */}
-        {activeTab === 'progress' && (
-          <React.Suspense
-            fallback={
-              <div className="p-12 text-center text-xs text-[var(--text-muted)] font-mono">
-                Loading analytics engine...
-              </div>
-            }
-          >
-            <ProgressView />
-          </React.Suspense>
-        )}
-
-        {/* TAB 4: EXERCISES */}
-        {activeTab === 'exercises' && <ExercisesView />}
-
-        {/* TAB 5: HISTORY */}
-        {activeTab === 'history' && <HistoryView />}
-
-        {/* TAB 6: SETTINGS */}
-        {activeTab === 'settings' && <SettingsView />}
-      </main>
+          <Routes>
+            <Route path="/" element={<WorkoutPage />} />
+            <Route path="/workout" element={<Navigate to="/" replace />} />
+            <Route path="/plans" element={<PlansPage />} />
+            <Route path="/calendar" element={<Navigate to="/plans" replace />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/exercises" element={<ExercisesPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
       </div>
 
       {/* Persistent Resume Mini Bar if active workout is in progress and viewing another tab */}
-      {activeWorkout && activeTab !== 'workout' && (
+      {activeWorkout && location.pathname !== '/' && location.pathname !== '/workout' && (
         <div
-          onClick={() => setActiveTab('workout')}
+          onClick={() => navigate('/')}
           className="fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-24 max-w-lg mx-auto z-40 bg-[#161616] border border-[#d9083c] p-3 rounded-md shadow-2xl flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors"
         >
           <div className="flex items-center space-x-2.5">
@@ -504,19 +139,13 @@ export default function App() {
       {/* Mobile Bottom Navigation - Visible on mobile/tablet */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)] border-t border-[var(--border-color)] px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] transition-colors duration-200">
         <div className="max-w-md mx-auto grid grid-cols-5 text-center text-[9px]">
-          {[
-            { id: 'workout', label: 'Workout', icon: Dumbbell },
-            { id: 'plans', label: 'Plans', icon: Layers },
-            { id: 'progress', label: 'Progress', icon: Trophy },
-            { id: 'history', label: 'History', icon: Flame },
-            { id: 'settings', label: 'Settings', icon: SettingsIcon },
-          ].map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id || (item.id === 'plans' && (activeTab as string) === 'calendar');
+            const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
+                onClick={() => navigate(item.path)}
                 className={`flex flex-col items-center py-1 transition-colors ${
                   isActive ? 'text-[#d9083c] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-color)]'
                 }`}
