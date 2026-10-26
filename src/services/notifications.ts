@@ -109,13 +109,13 @@ export async function sendSystemNotification(options: {
     return false;
   }
 
+  // Standard notification payload - let the OS handle sound and haptic vibration naturally
   const notificationOptions = {
     body: options.body,
     icon: '/favicon.svg',
     badge: '/favicon.svg',
     tag: options.tag || 'gymlog-timer-alert',
     renotify: true,
-    vibrate: [200, 100, 200, 100, 300],
     data: { url: '/' },
   };
 
@@ -149,22 +149,17 @@ export async function sendSystemNotification(options: {
 }
 
 /**
- * Triggers the full alert sequence: sound, vibration, and push notification.
+ * Triggers rest end notification, allowing the device OS to handle notification sound and haptics.
  */
 export async function triggerRestEndAlert(
   exerciseName?: string,
   isBetweenExercise?: boolean
 ): Promise<void> {
-  // Check user settings from Dexie
-  let soundEnabled = true;
-  let vibrateEnabled = true;
   let notifsEnabled = true;
 
   try {
     const settings = await db.settings.toArray();
     const map = new Map(settings.map((s) => [s.key, s.value]));
-    if (map.has('soundEnabled')) soundEnabled = Boolean(map.get('soundEnabled'));
-    if (map.has('vibrateEnabled')) vibrateEnabled = Boolean(map.get('vibrateEnabled'));
     if (map.has('timerNotificationsEnabled')) {
       notifsEnabled = Boolean(map.get('timerNotificationsEnabled'));
     }
@@ -172,12 +167,7 @@ export async function triggerRestEndAlert(
     // Default to true
   }
 
-  // Play audio chime and vibrate
-  if (soundEnabled || vibrateEnabled) {
-    playTimerChime();
-  }
-
-  // Send push notification if enabled
+  // If notification permission is granted, dispatch the OS notification
   if (notifsEnabled && isNotificationSupported() && Notification.permission === 'granted') {
     const title = isBetweenExercise ? 'Break Finished! 🔔' : 'Rest Time Over! ⚡';
     const body = isBetweenExercise
@@ -193,6 +183,9 @@ export async function triggerRestEndAlert(
       body,
       tag: 'gymlog-rest-timer',
     });
+  } else {
+    // Foreground audio beep fallback if notifications are not enabled or permission not granted
+    playTimerChime();
   }
 }
 
@@ -200,7 +193,6 @@ export async function triggerRestEndAlert(
  * Dispatches an immediate test notification.
  */
 export async function sendTestNotification(): Promise<boolean> {
-  playTimerChime();
   return sendSystemNotification({
     title: 'GymLog Notifications Active! 🏋️',
     body: "You'll get an alert like this when your rest or break timer ends.",

@@ -20,8 +20,6 @@ import {
   Sun,
   FileSpreadsheet,
   Bell,
-  Volume2,
-  Smartphone,
   Sparkles,
 } from 'lucide-react';
 
@@ -34,8 +32,6 @@ export function SettingsView() {
   const defaultRest = (settingsMap.get('defaultRestSec') as number) || 90;
   const betweenExerciseRest = (settingsMap.get('betweenExerciseRestSec') as number) || 120;
   const e1rmFormula = (settingsMap.get('e1rmFormula') as 'epley' | 'brzycki') || 'epley';
-  const soundEnabled = settingsMap.has('soundEnabled') ? Boolean(settingsMap.get('soundEnabled')) : true;
-  const vibrateEnabled = settingsMap.has('vibrateEnabled') ? Boolean(settingsMap.get('vibrateEnabled')) : true;
   const timerNotificationsEnabled = settingsMap.has('timerNotificationsEnabled')
     ? Boolean(settingsMap.get('timerNotificationsEnabled'))
     : true;
@@ -299,48 +295,6 @@ export function SettingsView() {
               </button>
             )}
           </div>
-        </div>
-
-        {/* Audio Beep Chime */}
-        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
-          <div className="flex items-center space-x-2.5">
-            <Volume2 className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-            <div>
-              <div className="text-sm font-semibold text-[var(--text-color)]">Audio Chime</div>
-              <div className="text-xs text-[var(--text-muted)]">Two-tone chime when rest is complete</div>
-            </div>
-          </div>
-          <button
-            onClick={() => handleUpdateSetting('soundEnabled', !soundEnabled)}
-            className={`px-3 py-1 text-xs font-bold uppercase rounded-sm transition-colors ${
-              soundEnabled
-                ? 'bg-[#d9083c] text-white'
-                : 'bg-[var(--hover-bg)] text-[var(--text-muted)] border border-[var(--border-color)]'
-            }`}
-          >
-            {soundEnabled ? 'ON' : 'OFF'}
-          </button>
-        </div>
-
-        {/* Vibration Alert */}
-        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
-          <div className="flex items-center space-x-2.5">
-            <Smartphone className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-            <div>
-              <div className="text-sm font-semibold text-[var(--text-color)]">Device Vibration</div>
-              <div className="text-xs text-[var(--text-muted)]">Haptic buzz on phones & supported devices</div>
-            </div>
-          </div>
-          <button
-            onClick={() => handleUpdateSetting('vibrateEnabled', !vibrateEnabled)}
-            className={`px-3 py-1 text-xs font-bold uppercase rounded-sm transition-colors ${
-              vibrateEnabled
-                ? 'bg-[#d9083c] text-white'
-                : 'bg-[var(--hover-bg)] text-[var(--text-muted)] border border-[var(--border-color)]'
-            }`}
-          >
-            {vibrateEnabled ? 'ON' : 'OFF'}
-          </button>
         </div>
 
         {/* PWA / iOS installation guidance note */}
