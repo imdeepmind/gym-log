@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#121212"/>
+  <circle cx="256" cy="256" r="140" fill="#d9083c"/>
+  <!-- Dumbbell Icon -->
+  <g fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M160 210 L160 302"/>
+    <path d="M120 230 L120 282"/>
+    <path d="M352 210 L352 302"/>
+    <path d="M392 230 L392 282"/>
+    <path d="M160 256 L352 256"/>
+  </g>
+</svg>
