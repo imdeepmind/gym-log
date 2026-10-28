@@ -8,6 +8,7 @@ import { startWorkoutFromPlan } from '@/services/plan';
 import { getActiveProgram } from '@/services/program';
 import { getScheduledPlansForDate } from '@/domain/schedule';
 import { ActiveWorkoutView } from '@/components/workout/ActiveWorkoutView';
+import { MonthlyChallenges } from '@/components/workout/MonthlyChallenges';
 import {
   Flame,
   Plus,
@@ -83,6 +84,9 @@ export function WorkoutPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Monthly Fitness Challenges */}
+      <MonthlyChallenges />
+
       {/* Today's Scheduled Plan or Completed Session Card */}
       <div
         className={`flat-card p-6 transition-colors ${
